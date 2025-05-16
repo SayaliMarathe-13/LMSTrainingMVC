@@ -69,6 +69,8 @@
             @Html.HiddenFor(m => m.PageNumber, new { @class = "form-control", placeholder = "Page No.", style = "width: 100px;", min = "1", id = "PageNumber" })
 
             @Html.HiddenFor(m => m.PageSize, new { @class = "form-control", placeholder = "Page Size", style = "width: 100px;", min = "1", id = "PageSize" })
+            @Html.HiddenFor(m => m.SortColumn, new { id = "SortColumn" })
+            @Html.HiddenFor(m => m.SortDirection, new { id = "SortDirection" })
 
 
             <button type="button" class="btn btn-primary" id="searchButton">Search</button>
@@ -219,6 +221,26 @@
                         });
                     }
                 });
+
+                $(document).on('click', 'a.sort', function (e) {
+                    e.preventDefault();
+                    var column = $(this).data('column');
+                    var currentSortColumn = $('#SortColumn').val();
+                    var currentSortDirection = $('#SortDirection').val();
+
+                    if (currentSortColumn === column) {
+                        // toggle sort direction
+                        var newDirection = (currentSortDirection === "ASC") ? "DESC" : "ASC";
+                        $('#SortDirection').val(newDirection);
+                    } else {
+                        $('#SortColumn').val(column);
+                        $('#SortDirection').val("ASC"); // default to ascending on new column
+                    }
+
+                    $('#PageNumber').val(1); // reset to first page when sorting changes
+                    loadBooks();
+                });
+
 
            $(document).on("click", ".open-book-form", function () {
                     var bookId = $(this).data("id");

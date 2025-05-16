@@ -1,23 +1,65 @@
 ﻿@model DAL.Models.BooksModel
-
+@using System.Web
 @{
     int totalPages = (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize);
     int startRecord = ((Model.PageNumber - 1) * Model.PageSize) + 1;
     int endRecord = startRecord + Model.BooksList.Count() - 1;
-}
+    string currentSortColumn = Model.SortColumn ?? "";
+    string currentSortDirection = Model.SortDirection ?? "ASC";
 
+    Func<string, IHtmlString> SortIcon = column =>
+    {
+        if (column == currentSortColumn)
+        {
+            return new MvcHtmlString(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;");
+        }
+        return MvcHtmlString.Empty;
+    };
+}
 
 <table class="table table-bordered table-striped">
     <thead class="thead-dark">
         <tr>
-            <th class="text-center">Book ID</th>
-            <th class="text-center">Book Name</th>
-            <th class="text-center">Publisher Name</th>
-            <th class="text-center">ISBN</th>
-            <th class="text-center">Total Copies</th>
-            <th class="text-center">Course Name</th>
-            <th class="text-center">Supplier Name</th>
-            <th class="text-center">Status</th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="BookId">
+                    Book ID @Html.Raw(SortIcon("BookId").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="BookName">
+                    Book Name @Html.Raw(SortIcon("BookName").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="PublisherName">
+                    Publisher Name @Html.Raw(SortIcon("PublisherName").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="ISBN">
+                    ISBN @Html.Raw(SortIcon("ISBN").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="TotalCopies">
+                    Total Copies @Html.Raw(SortIcon("TotalCopies").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="CourseName">
+                    Course Name @Html.Raw(SortIcon("CourseName").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="SupplierName">
+                    Supplier Name @Html.Raw(SortIcon("SupplierName").ToString())
+                </a>
+            </th>
+            <th class="text-center">
+                <a href="#" class="sort" data-column="IsActive">
+                    Status @Html.Raw(SortIcon("IsActive").ToString())
+                </a>
+            </th>
             <th class="text-center">Actions</th>
         </tr>
     </thead>
@@ -35,15 +77,12 @@
                     <td class="text-start">@book.CourseName</td>
                     <td class="text-start">@book.SupplierName</td>
                     <td class="text-center">
-                        <span class="badge @(book.IsActive == true ? "bg-success" : "bg-danger")">
-                            @(book.IsActive == true ? "Active" : "Inactive")
+                        <span class="badge @(book.IsActive ? "bg-success" : "bg-danger")">
+                            @(book.IsActive ? "Active" : "Inactive")
                         </span>
                     </td>
                     <td class="text-center">
                         <div class="d-inline-flex">
-                            @*<a href="@Url.Action("AddBook", "Books", new { id = book.BookId })" class="btn btn-outline-primary btn-sm me-2" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>*@
                             <button type="button"
                                     class="btn btn-outline-primary btn-sm me-2 open-book-form"
                                     data-id="@book.BookId"
@@ -62,18 +101,18 @@
                             </button>
                         </div>
                     </td>
-
                 </tr>
             }
         }
         else
         {
             <tr>
-                <td colspan="8" class="text-center">No books found.</td>
+                <td colspan="9" class="text-center">No books found.</td>
             </tr>
         }
     </tbody>
 </table>
+
 <div>
     @if (Model.TotalRecords > 0)
     {
@@ -96,7 +135,7 @@
                 <option value="@i" @(Model.PageSize == i ? "selected" : "")>@i</option>
             }
         </select>
-</div>
+    </div>
 
     <ul class="pagination mb-0">
         @if (Model.PageNumber > 1)
@@ -119,4 +158,3 @@
         }
     </ul>
 </div>
-
