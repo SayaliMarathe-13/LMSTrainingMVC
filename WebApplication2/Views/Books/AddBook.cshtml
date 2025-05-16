@@ -1,0 +1,140 @@
+﻿@model DAL.Models.BooksModel
+
+@{
+    var isEdit = Model.BookId > 0;
+    ViewBag.Title = isEdit ? "Edit Book" : "Add New Book";
+}
+<h3 class="text-center text-primary fw-bold">@ViewBag.Title</h3>
+
+<div class="container mt-5 pt-5">
+    @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "addBookForm", enctype = "multipart/form-data" }))
+    {
+        @Html.HiddenFor(m => m.BookId)
+        @Html.HiddenFor(m => m.CreatedOn)
+        <div class="row g-3 mb-4 text-start">
+
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.BookName, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.BookName, new { @class = "form-control",  placeholder = "Enter Book Name", @id = "BookName" })
+                @Html.ValidationMessageFor(m => m.BookName, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- ISBN -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.ISBN, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.ISBN, new { @class = "form-control",  placeholder = "Enter 10-digit ISBN", maxlength = "10", @id = "ISBN" })
+                @Html.ValidationMessageFor(m => m.ISBN, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Total Copies -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.TotalCopies, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.TotalCopies, new { @class = "form-control",  type = "number", placeholder = "Total Copies", @id = "TotalCopies" })
+                @Html.ValidationMessageFor(m => m.TotalCopies, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Publisher -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.PublisherId, new { @class = "form-label" })
+                @Html.DropDownListFor(m => m.PublisherId, new SelectList(Model.PublishersList, "PublisherId", "PublisherName"), "Select Publisher", new { @class = "form-select", @id = "PublisherId"})
+                @Html.ValidationMessageFor(m => m.PublisherId, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Course -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.CourseId, new { @class = "form-label" })
+                @Html.DropDownListFor(m => m.CourseId, new SelectList(Model.CoursesList, "CourseId", "CourseName"), "Select Course", new { @class = "form-select", @id = "CourseId" })
+                @Html.ValidationMessageFor(m => m.CourseId, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Supplier -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.SupplierId, new { @class = "form-label" })
+                @Html.DropDownListFor(m => m.SupplierId, new SelectList(Model.SuppliersList, "SupplierId", "SupplierName"), "Select Supplier", new { @class = "form-select", @id = "SupplierId" })
+                @Html.ValidationMessageFor(m => m.SupplierId, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- IsActive -->
+            <div class="col-md-12">
+                <div class="form-check">
+                    @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input", @id = "IsActive" })
+                    @Html.LabelFor(m => m.IsActive, new { @class = "form-check-label" })
+                </div>
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <button type="submit" class="btn btn-success px-4">
+                @(isEdit ? "Update" : "Save")
+            </button>
+            <a href="@Url.Action("List", "Books")" class="btn btn-secondary px-4">Cancel</a>
+        </div>
+    }
+</div>
+
+<div id="successMessage" class="alert alert-success mt-3" style="display: none;"></div>
+<div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        //$("#addbookform").validate();
+
+        $("#addBookForm").submit(function (e) {
+            e.preventDefault();
+
+            if ($("#addBookForm").valid()) {
+
+                var model = {
+                    BookId: $("#BookId").val(),
+                    BookName: $("#BookName").val().trim(),
+                    ISBN: $("#ISBN").val(),
+                    TotalCopies: $("#TotalCopies").val(),
+                    PublisherId: $("#PublisherId").val(),
+                    CourseId: $("#CourseId").val(),
+                    SupplierId: $("#SupplierId").val(),
+                    IsActive: $("#IsActive").is(":checked"),
+                    CreatedOn: $("#CreatedOn").val(),
+                };
+
+                $.ajax({
+                    url: '@Url.Action("AddBook", "Books")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify(model),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#successMessage').text(response.message).show();
+                            setTimeout(function () {
+                                window.location.href = '@Url.Action("List", "Books")';
+                            }, 2000);
+                        } else {
+                            if (response.errors) {
+                                $('.text-danger').text('');
+                                $.each(response.errors, function (key, errors) {
+                                    var errorSpan = $('#' + key).next('.text-danger');
+                                    if (errorSpan.length == 0) {
+                                        errorSpan = $('<span class="text-danger"></span>');
+                                        $('#' + key).after(errorSpan);
+                                    }
+                                    errorSpan.text(errors.join(', '));
+                                });
+                            } else {
+                                $('#errorMessage').text(response.message).show();
+                            }
+                        }
+                    },
+                    error: function () {
+                        $('#errorMessage').text('An unexpected error occurred. Please try again.').show();
+                    }
+                });
+            }
+        });
+    });
+    </script>
+}

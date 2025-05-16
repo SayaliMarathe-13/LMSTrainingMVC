@@ -1,0 +1,10 @@
+﻿----- Error Logged at: 5/6/2025 6:53:40 PM -----
+Message    : Test exception to check file logging.
+StackTrace :    at DAL.Dal.Handler..ctor() in D:\OneDrive - Rheal Software Pvt Ltd\Training\MVC\WebApplication2\LMSClassLibrary\Dal\Handler.cs:line 23
+--------------------------------------------------
+
+----- Error Logged at: 5/7/2025 11:24:48 AM -----
+Message    : Test exception to check file logging.
+StackTrace :    at DAL.Dal.Handler..ctor() in D:\OneDrive - Rheal Software Pvt Ltd\Training\MVC\WebApplication2\LMSClassLibrary\Dal\Handler.cs:line 23
+--------------------------------------------------
+

@@ -1,0 +1,122 @@
+﻿@model DAL.Models.BooksModel
+
+@{
+    int totalPages = (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize);
+    int startRecord = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+    int endRecord = startRecord + Model.BooksList.Count() - 1;
+}
+
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th class="text-center">Book ID</th>
+            <th class="text-center">Book Name</th>
+            <th class="text-center">Publisher Name</th>
+            <th class="text-center">ISBN</th>
+            <th class="text-center">Total Copies</th>
+            <th class="text-center">Course Name</th>
+            <th class="text-center">Supplier Name</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.BooksList != null && Model.BooksList.Count > 0)
+        {
+            foreach (var book in Model.BooksList)
+            {
+                <tr>
+                    <td class="text-center">@book.BookId</td>
+                    <td class="text-start">@book.BookName</td>
+                    <td class="text-start">@book.PublisherName</td>
+                    <td class="text-end">@book.ISBN</td>
+                    <td class="text-end">@book.TotalCopies</td>
+                    <td class="text-start">@book.CourseName</td>
+                    <td class="text-start">@book.SupplierName</td>
+                    <td class="text-center">
+                        <span class="badge @(book.IsActive == true ? "bg-success" : "bg-danger")">
+                            @(book.IsActive == true ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-inline-flex">
+                            @*<a href="@Url.Action("AddBook", "Books", new { id = book.BookId })" class="btn btn-outline-primary btn-sm me-2" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>*@
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm me-2 open-book-form"
+                                    data-id="@book.BookId"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#addBookModal"
+                                    title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm delete-book"
+                                    data-id="@book.BookId"
+                                    data-name="@book.BookName"
+                                    title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-center">No books found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    @if (Model.TotalRecords > 0)
+    {
+        <h3 style="font-size: 18px;">
+            Showing records from @startRecord to @endRecord of total @Model.TotalRecords records.
+        </h3>
+    }
+    else
+    {
+        <h3 style="font-size: 18px;">No records found.</h3>
+    }
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="d-flex align-items-center">
+        <label for="PageSizeSelector" class="me-2 mb-0">Records per page:</label>
+        <select id="PageSizeSelector" class="form-select" style="width: auto;">
+            @for (int i = 1; i <= 10; i++)
+            {
+                <option value="@i" @(Model.PageSize == i ? "selected" : "")>@i</option>
+            }
+        </select>
+</div>
+
+    <ul class="pagination mb-0">
+        @if (Model.PageNumber > 1)
+        {
+            <li class="page-item">
+                <button type="button" class="page-link pagination-button" data-page="@(Model.PageNumber - 1)">Previous</button>
+            </li>
+        }
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item">
+                <button type="button" class="page-link pagination-button @(i == Model.PageNumber ? "active" : "")" data-page="@i">@i</button>
+            </li>
+        }
+        @if (Model.PageNumber < totalPages)
+        {
+            <li class="page-item">
+                <button type="button" class="page-link pagination-button" data-page="@(Model.PageNumber + 1)">Next</button>
+            </li>
+        }
+    </ul>
+</div>
+

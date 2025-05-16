@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "About Us";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .about-container {
+        max-width: 900px;
+        margin: 100px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 18px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .about-section {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+        .about-section h2 {
+            color: #007bff;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+    .features {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        gap: 15px;
+    }
+
+    .feature-box {
+        flex: 1;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+        .feature-box h4 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+    .explore-btn {
+        margin-top: 30px;
+        display: inline-block;
+        padding: 12px 25px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: 500;
+        transition: 0.3s ease-in-out;
+    }
+
+        .explore-btn:hover {
+            background: #0056b3;
+        }
+</style>
+
+<div class="about-container">
+    <h1>About Us</h1>
+    <p>Empowering Learning Through Technology</p>
+
+    <div class="about-section">
+        <h2>Who We Are</h2>
+        <p>
+            Welcome to <strong>EduLearn LMS</strong>, your trusted platform for online learning and education management.
+            Our mission is to provide an intuitive and interactive environment that enhances learning for students,
+            educators, and institutions worldwide.
+        </p>
+    </div>
+
+    <div class="about-section">
+        <h2>Our Vision</h2>
+        <p>
+            We believe in the power of digital education and strive to make learning accessible, engaging, and efficient.
+        </p>
+    </div>
+
+    <div class="features">
+        <div class="feature-box">
+            <h4>📚 Quality Courses</h4>
+            <p>We offer a diverse range of courses designed by industry experts.</p>
+        </div>
+        <div class="feature-box">
+            <h4>🌍 Global Community</h4>
+            <p>Join thousands of learners and educators from across the world.</p>
+        </div>
+        <div class="feature-box">
+            <h4>🔒 Secure & Reliable</h4>
+            <p>Your data and learning experience are protected with the latest technology.</p>
+        </div>
+    </div>
+
+    <a href="@Url.Action("Index", "Home")" class="explore-btn">Explore Courses</a>
+</div>
