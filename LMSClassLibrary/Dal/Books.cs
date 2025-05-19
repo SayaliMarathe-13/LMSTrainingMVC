@@ -77,12 +77,11 @@ namespace DAL.Dal
 
                 db.AddInParameter(com, "PageSize", DbType.Int32, model.PageSize);
 
-                string sortColumn = string.IsNullOrWhiteSpace(model.SortColumn) ? "BookName" : model.SortColumn;
-                string sortDirection = string.IsNullOrWhiteSpace(model.SortDirection) ? "ASC" : model.SortDirection.ToUpper();
+                model.SortColumn = string.IsNullOrWhiteSpace(model.SortColumn) ? "BookName" : model.SortColumn;
+                model.SortDirection = string.IsNullOrWhiteSpace(model.SortDirection) ? "ASC" : model.SortDirection.ToUpper();
 
-                // Pass sorting params to SP
-                db.AddInParameter(com, "SortColumn", DbType.String, sortColumn);
-                db.AddInParameter(com, "SortDirection", DbType.String, sortDirection);
+                db.AddInParameter(com, "SortColumn", DbType.String, model.SortColumn);
+                db.AddInParameter(com, "SortDirection", DbType.String, model.SortDirection);
 
 
                 DataSet ds = db.ExecuteDataSet(com);

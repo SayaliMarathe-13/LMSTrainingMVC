@@ -229,15 +229,14 @@
                     var currentSortDirection = $('#SortDirection').val();
 
                     if (currentSortColumn === column) {
-                        // toggle sort direction
                         var newDirection = (currentSortDirection === "ASC") ? "DESC" : "ASC";
                         $('#SortDirection').val(newDirection);
                     } else {
                         $('#SortColumn').val(column);
-                        $('#SortDirection').val("ASC"); // default to ascending on new column
+                        $('#SortDirection').val("ASC"); 
                     }
 
-                    $('#PageNumber').val(1); // reset to first page when sorting changes
+                    $('#PageNumber').val(1); 
                     loadBooks();
                 });
 

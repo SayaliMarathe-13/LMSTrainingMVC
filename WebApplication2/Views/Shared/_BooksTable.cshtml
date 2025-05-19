@@ -4,65 +4,90 @@
     int totalPages = (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize);
     int startRecord = ((Model.PageNumber - 1) * Model.PageSize) + 1;
     int endRecord = startRecord + Model.BooksList.Count() - 1;
-    string currentSortColumn = Model.SortColumn ?? "";
-    string currentSortDirection = Model.SortDirection ?? "ASC";
-
-    Func<string, IHtmlString> SortIcon = column =>
-    {
-        if (column == currentSortColumn)
-        {
-            return new MvcHtmlString(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;");
-        }
-        return MvcHtmlString.Empty;
-    };
+    string currentSortColumn = Model.SortColumn;
+    string currentSortDirection = Model.SortDirection;
 }
+
 
 <table class="table table-bordered table-striped">
     <thead class="thead-dark">
         <tr>
             <th class="text-center">
                 <a href="#" class="sort" data-column="BookId">
-                    Book ID @Html.Raw(SortIcon("BookId").ToString())
+                    Book ID
+                    @if (currentSortColumn == "BookId")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="BookName">
-                    Book Name @Html.Raw(SortIcon("BookName").ToString())
+                    Book Name
+                    @if (currentSortColumn == "BookName")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="PublisherName">
-                    Publisher Name @Html.Raw(SortIcon("PublisherName").ToString())
+                    Publisher Name
+                    @if (currentSortColumn == "PublisherName")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="ISBN">
-                    ISBN @Html.Raw(SortIcon("ISBN").ToString())
+                    ISBN
+                    @if (currentSortColumn == "ISBN")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="TotalCopies">
-                    Total Copies @Html.Raw(SortIcon("TotalCopies").ToString())
+                    Total Copies
+                    @if (currentSortColumn == "TotalCopies")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="CourseName">
-                    Course Name @Html.Raw(SortIcon("CourseName").ToString())
+                    Course Name
+                    @if (currentSortColumn == "CourseName")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="SupplierName">
-                    Supplier Name @Html.Raw(SortIcon("SupplierName").ToString())
+                    Supplier Name
+                    @if (currentSortColumn == "SupplierName")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">
                 <a href="#" class="sort" data-column="IsActive">
-                    Status @Html.Raw(SortIcon("IsActive").ToString())
+                    Status
+                    @if (currentSortColumn == "IsActive")
+                    {
+                        @Html.Raw(currentSortDirection == "ASC" ? " &#9650;" : " &#9660;")
+                    }
                 </a>
             </th>
             <th class="text-center">Actions</th>
         </tr>
     </thead>
+
     <tbody>
         @if (Model.BooksList != null && Model.BooksList.Count > 0)
         {
@@ -159,10 +184,9 @@
     </ul>
 </div>
 <style>
-    a.sort {
-        color: inherit;
+    .sort {
+        cursor: pointer;
+        color: inherit; 
         text-decoration: none;
-        font-weight: bold;
-        cursor: pointer; 
     }
 </style>
