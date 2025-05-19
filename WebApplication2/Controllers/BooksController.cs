@@ -172,5 +172,9 @@ namespace WebApplication2.Controllers
             }
         }
 
+        public ActionResult IssueBooks()
+        {
+            return View();
+        }
     }
 }

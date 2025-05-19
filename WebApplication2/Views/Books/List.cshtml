@@ -39,17 +39,37 @@
 
             @Html.TextBoxFor(m => m.BookName, new { @class = "form-control", placeholder = "Search Books...", style = "width: 300px;", id = "BookName" })
 
-            @Html.DropDownListFor(m => m.PublisherId,
-                new SelectList(Model.PublishersList, "PublisherId", "PublisherName"),
-                "Select Publisher",
-                new { @class = "form-select filter-dropdown", @id = "PublisherId", style = "width: 200px;" })
+            <!-- Publisher Multi-select -->
+            <select id="PublisherIdsDropdown" name="PublisherIds" multiple
+                    class="selectpicker form-control filter-dropdown"
+                    data-live-search="true"
+                    data-actions-box="true"
+                    title="Select publishers"
+                    style="width: 200px;">
+                @foreach (var publisher in Model.PublishersList)
+                {
+                    <option value="@publisher.PublisherId" @(Model.PublisherIds != null && Model.PublisherIds.Contains(publisher.PublisherId) ? "selected" : "")>
+                        @publisher.PublisherName
+                    </option>
+                }
+            </select>
 
-            @Html.DropDownListFor(m => m.SupplierId,
-                new SelectList(Model.SuppliersList, "SupplierId", "SupplierName"),
-                "Select Supplier",
-                new { @class = "form-select filter-dropdown", @id = "SupplierId", style = "width: 200px;" })
+            <!-- Supplier Multi-select -->
+            <select id="SupplierIdsDropdown" name="SupplierIds" multiple
+                    class="selectpicker form-control filter-dropdown"
+                    data-live-search="true"
+                    data-actions-box="true"
+                    title="Select suppliers"
+                    style="width: 200px;">
+                @foreach (var supplier in Model.SuppliersList)
+                {
+                    <option value="@supplier.SupplierId" @(Model.SupplierIds != null && Model.SupplierIds.Contains(supplier.SupplierId) ? "selected" : "")>
+                        @supplier.SupplierName
+                    </option>
+                }
+            </select>
 
-
+            <!-- Your existing multi-select courses -->
             <select id="CourseIdsDropdown" name="CourseIds" multiple
                     class="selectpicker form-control"
                     data-live-search="true"
@@ -57,12 +77,11 @@
                     title="Select courses">
                 @foreach (var course in Model.CoursesList)
                 {
-                    <option value="@course.CourseId" @(Model.CourseIds.Contains(course.CourseId) ? "selected" : "")>
+                    <option value="@course.CourseId" @(Model.CourseIds != null && Model.CourseIds.Contains(course.CourseId) ? "selected" : "")>
                         @course.CourseName
                     </option>
                 }
             </select>
-
 
 
 
@@ -133,11 +152,11 @@
        $(document).ready(function () {
            loadBooks();
 
-           $('#CourseIdsDropdown').selectpicker({
+           $('.selectpicker').selectpicker({
                liveSearch: true,
                actionsBox: true,
-               selectedTextFormat: 'count > 1',  
-               noneSelectedText: 'Select courses',
+               selectedTextFormat: 'count > 1',
+               noneSelectedText: 'Select options',
                countSelectedText: '{0} selected'
            });
 
@@ -322,10 +341,9 @@
                }
            });*@
 
-           $('#CourseIdsDropdown').on('changed.bs.select', function () {
+           $('.selectpicker').on('changed.bs.select', function () {
                loadBooks();
            });
-
 
            $('.filter-dropdown').change(function () {
             //$('#PageNumber').val(1);
@@ -340,6 +358,8 @@
             $('#BookName').val("");
             $('#PublisherId').val("");
             $('#SupplierId').val("");
+            $('#PublisherIdsDropdown').selectpicker('deselectAll');
+            $('#SupplierIdsDropdown').selectpicker('deselectAll');
             $('#CourseIdsDropdown').selectpicker('deselectAll');
             $('#PageNumber').val(1);
             $('#PageSize').val(10);

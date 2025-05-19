@@ -166,6 +166,7 @@
     <Content Include="Views\Books\AddBook.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_AddBook.cshtml" />
+    <Content Include="Views\Books\IssueBooks.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

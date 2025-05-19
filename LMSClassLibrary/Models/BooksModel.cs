@@ -45,6 +45,8 @@ namespace DAL.Models
         public List<SuppliersModel> SuppliersList { get; set; }
         public List<CoursesModel> CoursesList { get; set; }
         public List<int> CourseIds { get; set; }=new List<int>();
+        public List<int> PublisherIds { get; set; } = new List<int>();
+        public List<int> SupplierIds { get; set; } = new List<int>();
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public int TotalRecords { get; set; }

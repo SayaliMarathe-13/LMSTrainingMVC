@@ -51,26 +51,37 @@ namespace DAL.Dal
                     db.AddInParameter(com, "BookName", DbType.String, DBNull.Value);
                 else
                     db.AddInParameter(com, "BookName", DbType.String, model.BookName);
-
-                if (model.PublisherId > 0)
-                    db.AddInParameter(com, "PublisherId", DbType.Int32, model.PublisherId);
+     
+                if (model.PublisherIds != null && model.PublisherIds.Count > 0)
+                {
+                    string publisherIdsCsv = string.Join(",", model.PublisherIds);
+                    db.AddInParameter(com, "PublisherIds", DbType.String, publisherIdsCsv);
+                }
                 else
-                    db.AddInParameter(com, "PublisherId", DbType.Int32, DBNull.Value);
+                {
+                    db.AddInParameter(com, "PublisherIds", DbType.String, DBNull.Value);
+                }
 
-                if (model.SupplierId > 0)
-                    db.AddInParameter(com, "SupplierId", DbType.Int32, model.SupplierId);
+                if (model.SupplierIds != null && model.SupplierIds.Count > 0)
+                {
+                    string supplierIdsCsv = string.Join(",", model.SupplierIds);
+                    db.AddInParameter(com, "SupplierIds", DbType.String, supplierIdsCsv);
+                }
                 else
-                    db.AddInParameter(com, "SupplierId", DbType.Int32, DBNull.Value);
+                {
+                    db.AddInParameter(com, "SupplierIds", DbType.String, DBNull.Value);
+                }
 
                 if (model.CourseIds != null && model.CourseIds.Count > 0)
                 {
-                    string courseIds = string.Join(",", model.CourseIds);
-                    db.AddInParameter(com, "CourseIds", DbType.String, courseIds);
+                    string courseIdsCsv = string.Join(",", model.CourseIds);
+                    db.AddInParameter(com, "CourseIds", DbType.String, courseIdsCsv);
                 }
                 else
                 {
                     db.AddInParameter(com, "CourseIds", DbType.String, DBNull.Value);
                 }
+
 
 
                 db.AddInParameter(com, "PageNumber", DbType.Int32, model.PageNumber);
