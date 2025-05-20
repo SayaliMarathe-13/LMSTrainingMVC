@@ -76,12 +76,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dal\BookIssue.cs" />
     <Compile Include="Dal\Books.cs" />
     <Compile Include="Dal\Courses.cs" />
     <Compile Include="FileLogger\FileLogger.cs" />
     <Compile Include="Dal\Handler.cs" />
     <Compile Include="Dal\Publishers.cs" />
     <Compile Include="Dal\Suppliers.cs" />
+    <Compile Include="Models\BookIssueDetailsModel.cs" />
+    <Compile Include="Models\BookIssueModel.cs" />
     <Compile Include="Models\BooksModel.cs" />
     <Compile Include="Models\CoursesModel.cs" />
     <Compile Include="Models\DepartmentsModel.cs" />

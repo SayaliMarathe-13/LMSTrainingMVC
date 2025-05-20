@@ -1,7 +1,58 @@
 ﻿
+
 @{
-    ViewBag.Title = "IssueBooks";
+    ViewBag.Title = "Issue Book";
 }
 
-<h2>IssueBooks</h2>
+<h2>Issue Book</h2>
 
+<form asp-action="IssueBook" method="post">
+
+    <div>
+        <label>Member ID</label>
+        <input asp-for="MemberId" type="number" required />
+    </div>
+
+    <div>
+        <label>Issue Date</label>
+        <input asp-for="IssueDate" type="date" required />
+    </div>
+
+    <div>
+        <label>Due Date</label>
+        <input asp-for="DueDate" type="date" required />
+    </div>
+
+    <div>
+        <label>Return Date</label>
+        <input asp-for="ReturnDate" type="date" />
+    </div>
+
+    <div>
+        <label>Librarian ID</label>
+        <input asp-for="LibrarianId" type="number" required />
+    </div>
+
+    <div>
+        <label>Book IDs (comma separated)</label>
+        <input name="BookIdsString" type="text" placeholder="e.g. 10,12,15" />
+    </div>
+
+    <div>
+        <label>Is Active</label>
+        <input asp-for="IsActive" type="checkbox" />
+    </div>
+
+    <div>
+        <label>Created By</label>
+        <input asp-for="CreatedBy" type="text" required />
+    </div>
+
+    <button type="submit">Issue Book</button>
+</form>
+
+@section Scripts {
+    <script>
+        // Optional: You can parse the comma-separated Book IDs before submit using JavaScript if you want.
+    </script>
+}
