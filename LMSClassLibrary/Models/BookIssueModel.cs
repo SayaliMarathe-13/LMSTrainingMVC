@@ -20,10 +20,12 @@ namespace DAL.Models
         public DateTime? ReturnDate { get; set; }
         public int LibrarianId { get; set; }
         public bool IsActive { get; set; }
-        public string CreatedBy { get; set; }
+        public int CreatedBy { get; set; }
         public DateTime? CreatedOn { get; set; }
-        public string ModifiedBy { get; set; }
+        public int ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public string SelectedBookIds { get; set; }
+
         public List<MembersModel> MembersList { get; set; }
 
 

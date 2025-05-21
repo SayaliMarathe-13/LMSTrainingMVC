@@ -163,7 +163,7 @@ namespace WebApplication2.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Failed to delete the book." });
+                    return Json(new { success = true, message = "Failed to delete the book." });
                 }
             }
             catch (Exception ex)
@@ -188,6 +188,67 @@ namespace WebApplication2.Controllers
 
             return View(model);
         }
+        [HttpPost]
+        public JsonResult IssueBooks(BookIssueModel model, string SelectedBookIds)
+        {
+            try
+            {
+                List<int> selectedBookIds = new List<int>();
+
+                if (!string.IsNullOrEmpty(SelectedBookIds))
+                {
+                    selectedBookIds = SelectedBookIds
+                        .Split(',')
+                        .Select(id => int.Parse(id))
+                        .ToList();
+                }
+
+
+                BookIssue bookIssueDal = new BookIssue
+                {
+                    MemberId = model.MemberId,
+                    IssueDate = model.IssueDate.Value,
+                    DueDate = model.DueDate.Value,
+                    LibrarianId = model.LibrarianId,
+                    IsActive = true,
+                    CreatedBy = 1,  
+                    CreatedOn = DateTime.Now
+                };
+
+                bool isBookIssueSaved = bookIssueDal.Save();
+
+                if (!isBookIssueSaved)
+                {
+                    return Json(new { success = false, message = "Failed to save book issue." });
+                }
+
+
+                foreach (int bookId in selectedBookIds)
+                {
+                    BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
+                    {
+                        BookIssueId = bookIssueDal.BookIssueId,
+                        BookId = bookId,
+                        IsActive = true,
+                        CreatedBy = 1,
+                        CreatedOn = DateTime.Now
+                    };
+
+                    if (!bookIssueDetailsDal.Save())
+                    {
+                        return Json(new { success = false, message = "Books issued Failed!" });
+                    }
+                }
+
+                return Json(new { success = true, message = "Books issued successfully!" });
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                return Json(new { success = false, message = "Error occurred while issuing books." });
+            }
+        }
+
 
     }
 }

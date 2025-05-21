@@ -1,8 +1,8 @@
 ﻿@model DAL.Models.BookIssueModel
 
 @{
-//var isEdit = Model.BookIssueId > 0;
-//ViewBag.Title = isEdit ? "Edit Issue Book" : "Issue Book";
+    //var isEdit = Model.BookIssueId > 0;
+    //ViewBag.Title = isEdit ? "Edit Issue Book" : "Issue Book";
 
 }
 
@@ -12,112 +12,212 @@
     @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "issueBookForm" }))
     {
         @Html.HiddenFor(m => m.BookIssueId)
-        @Html.HiddenFor(m => m.CreatedOn)
-        @Html.HiddenFor(m => m.CreatedBy)
-
-    <div class="row g-3 mb-4 text-start">
-
-        <div class="col-md-6">
-            @Html.LabelFor(m => m.MemberId, new { @class = "form-label" })
-
-            @Html.DropDownListFor(m => m.MemberId,
-                 new SelectList(Model.MembersList, "MemberId", "MemberName"),
-                 "-- Select Member --",
-                 new { @class = "form-select", @id = "MemberId" })
-
-        </div>
-        <!-- Librarian TextBox -->
-        <div class="col-md-6">
-            @Html.LabelFor(m => m.LibrarianId, new { @class = "form-label" })
-            @Html.TextBoxFor(m => m.LibrarianId, new { @class = "form-control", @id = "LibrarianId", type = "number" })
-            @Html.ValidationMessageFor(m => m.LibrarianId, "", new { @class = "text-danger" })
-        </div>
+        @*@Html.HiddenFor(m => m.CreatedOn)
+            @Html.HiddenFor(m => m.CreatedBy)*@
+        @Html.Hidden("SelectedBookIds", "")
 
 
-        <!-- Issue Date -->
-        <div class="col-md-6">
-            @Html.LabelFor(m => m.IssueDate, new { @class = "form-label" })
-            @Html.TextBoxFor(m => m.IssueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "IssueDate" })
-            @Html.ValidationMessageFor(m => m.IssueDate, "", new { @class = "text-danger" })
-        </div>
+        <div class="row g-3 mb-4 text-start">
 
-        <!-- Due Date -->
-        <div class="col-md-6">
-            @Html.LabelFor(m => m.DueDate, new { @class = "form-label" })
-            @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "DueDate" })
-            @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
-        </div>
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.MemberId, new { @class = "form-label" })
 
-        <!-- IsActive -->
-        <div class="col-md-12">
-            <div class="form-check">
-                @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input", @id = "IsActive" })
-                @Html.LabelFor(m => m.IsActive, new { @class = "form-check-label" })
+                @Html.DropDownListFor(m => m.MemberId,
+                     new SelectList(Model.MembersList, "MemberId", "MemberName"),
+                     "-- Select Member --",
+                     new { @class = "form-select", @id = "MemberId" })
+
             </div>
-        </div>
+            <!-- Librarian TextBox -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.LibrarianId, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.LibrarianId, new { @class = "form-control", @id = "LibrarianId", type = "number" })
+                @Html.ValidationMessageFor(m => m.LibrarianId, "", new { @class = "text-danger" })
+            </div>
 
-        <!-- Books label and Add button -->
-        <div class="col-md-12">
-            <label class="form-label">Books</label>
-            <button type="button" class="btn btn-outline-primary ms-3" id="btnAddBook">Add Book</button>
-        </div>
 
-        <div class="modal fade" id="bookSelectionModal" tabindex="-1">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Select Books</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <!-- Issue Date -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.IssueDate, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.IssueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "IssueDate" })
+                @Html.ValidationMessageFor(m => m.IssueDate, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Due Date -->
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.DueDate, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "DueDate" })
+                @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
+            </div>
+
+
+
+            <!-- Books label and Add button -->
+            <div class="col-md-12">
+                <label class="form-label">Books</label>
+                <button type="button" class="btn btn-outline-primary ms-3" id="btnAddBook">Add Book</button>
+            </div>
+
+            <div class="modal fade" id="bookSelectionModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Select Books</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="booksListContainer"></div>
                     </div>
-                    <div class="modal-body" id="booksListContainer"></div>
                 </div>
             </div>
+
+
+
+            <!-- Book list table -->
+            <div class="col-md-12" id="selectedBooksContainer">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Book Name</th>
+                            <th>ISBN</th>
+                            <th>Publisher</th>
+                            <th>Course</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="booksListBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
 
 
-
-        <!-- Book list table -->
-        <div class="col-md-12">
-            <table class="table table-bordered table-sm">
-                <thead class="table-light">
-                    <tr>
-                        <th>Book Name</th>
-                        <th>ISBN</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="booksListBody">
-                    <tr>
-                        <td>Sample Book</td>
-                        <td>1234567890</td>
-                        <td><button type="button" class="btn btn-sm btn-danger" disabled>Remove</button></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-    </div>
 
         <div class="d-flex justify-content-center gap-3 mt-3">
             <button type="submit" class="btn btn-success px-4">
-                @*@(isEdit ? "Update" : "Save")*@
                 Save
             </button>
-            <a href="@Url.Action("Index", "IssueBooks")" class="btn btn-secondary px-4">Cancel</a>
+            <a href="@Url.Action("list", "Books")" class="btn btn-secondary px-4">Cancel</a>
         </div>
     }
 </div>
 <script>
-    $('#btnAddBook').click(function () {
+    $(document).ready(function () {
+
+        var selectedBooks = [];
+
+        $('#btnAddBook').click(function () {
+            $.ajax({
+                url: '/Books/GetBooksList',
+                type: 'POST',
+                data: { IsSelectionMode: true },
+                success: function (result) {
+                    $('#booksListContainer').html(result);
+
+                    // Re-check previously selected books in modal
+                    selectedBooks.forEach(function (book) {
+                        $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
+                    });
+
+                    $('#bookSelectionModal').modal('show');
+                },
+                error: function () {
+                    alert('Failed to load books list.');
+                }
+            });
+        });
+
+        $('#booksListContainer').on('change', '.book-checkbox', function () {
+            var bookId = $(this).data('book-id');
+            var isChecked = $(this).is(':checked');
+
+            if (isChecked) {
+                if (!selectedBooks.some(b => b.BookId === bookId)) {
+                    selectedBooks.push({
+                        BookId: bookId,
+                        BookName: $(this).data('book-name'),
+                        ISBN: $(this).data('isbn'),
+                        PublisherName: $(this).data('publisher-name'),
+                        CourseName: $(this).data('course-name')
+                    });
+                }
+            } else {
+                selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+            }
+
+            renderSelectedBooksTable(selectedBooks);
+        });
+
+        function renderSelectedBooksTable(books) {
+            var tbody = $('#booksListBody');
+            tbody.empty();
+
+            books.forEach(function (book) {
+                var row = $('<tr>');
+                row.append($('<td>').text(book.BookName));
+                row.append($('<td>').text(book.ISBN));
+                row.append($('<td>').text(book.PublisherName));
+                row.append($('<td>').text(book.CourseName));
+                row.append(
+                    $('<td>').html('<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>')
+                );
+                tbody.append(row);
+            });
+        }
+
+        $('#selectedBooksContainer').on('click', '.remove-book', function () {
+            var bookId = $(this).data('book-id');
+
+            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+
+            renderSelectedBooksTable(selectedBooks);
+
+            $('.book-checkbox[data-book-id="' + bookId + '"]').prop('checked', false);
+        });
+
+
+     $('#issueBookForm').submit(function (e) {
+        e.preventDefault();
+
+        var ids = selectedBooks.map(function (book) {
+            return book.BookId;
+        }).join(',');
+
+        $('input[name="SelectedBookIds"]').val(ids);
+
+        var model = {
+            BookIssueId: $('#BookIssueId').val(),
+            MemberId: $('#MemberId').val(),
+            LibrarianId: $('#LibrarianId').val(),
+            IssueDate: $('#IssueDate').val(),
+            DueDate: $('#DueDate').val(),
+            CreatedBy: 1,
+            SelectedBookIds: ids
+        };
+
         $.ajax({
-            url: '/Books/GetBooksList',
+            url: '@Url.Action("IssueBooks", "Books")',
             type: 'POST',
-            data: { IsSelectionMode: true},
-            success: function (result) {
-                $('#booksListContainer').html(result);
-                $('#bookSelectionModal').modal('show');
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(model),
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.message);
+                    window.location.href = '@Url.Action("List", "Books")';
+                } else {
+                    alert('Failed: ' + response.message);
+                }
+            },
+            error: function () {
+                alert('An unexpected error occurred while issuing books.');
             }
         });
     });
 
+
+    });
 </script>
+
+

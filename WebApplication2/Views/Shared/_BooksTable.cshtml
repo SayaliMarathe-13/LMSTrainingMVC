@@ -110,9 +110,15 @@
                         @if (Model.IsSelectionMode)
                         {
                             <input type="checkbox" class="book-checkbox"
-                                   data-bookid="@book.BookId"
-                                   value="@book.BookId" />
+                                   data-book-id="@book.BookId"
+                                   data-book-name="@book.BookName"
+                                   data-isbn="@book.ISBN"
+                                   data-publisher-name="@book.PublisherName"
+                                   data-course-name="@book.CourseName" />
+
+
                         }
+
                         else
                         {
                             <div class="d-inline-flex">
