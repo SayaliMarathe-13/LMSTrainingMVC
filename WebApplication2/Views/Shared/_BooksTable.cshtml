@@ -107,25 +107,35 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        <div class="d-inline-flex">
-                            <button type="button"
-                                    class="btn btn-outline-primary btn-sm me-2 open-book-form"
-                                    data-id="@book.BookId"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#addBookModal"
-                                    title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </button>
+                        @if (Model.IsSelectionMode)
+                        {
+                            <input type="checkbox" class="book-checkbox"
+                                   data-bookid="@book.BookId"
+                                   value="@book.BookId" />
+                        }
+                        else
+                        {
+                            <div class="d-inline-flex">
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm me-2 open-book-form"
+                                        data-id="@book.BookId"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addBookModal"
+                                        title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
 
-                            <button type="button"
-                                    class="btn btn-outline-danger btn-sm delete-book"
-                                    data-id="@book.BookId"
-                                    data-name="@book.BookName"
-                                    title="Delete">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm delete-book"
+                                        data-id="@book.BookId"
+                                        data-name="@book.BookName"
+                                        title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        }
                     </td>
+
                 </tr>
             }
         }

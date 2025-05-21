@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System;
+using DAL.Dal;
 
 namespace WebApplication2.Controllers
 {
@@ -174,7 +175,19 @@ namespace WebApplication2.Controllers
 
         public ActionResult IssueBooks()
         {
-            return View();
+            var model = new BookIssueModel();
+           
+            var Membersdal = new Members();
+            model.MembersList = Membersdal.GetAllMemberNames();
+
+            model.LibrarianId = 1;
+
+            model.IssueDate = DateTime.Today;
+            model.DueDate = DateTime.Today.AddDays(7);
+            model.IsActive = true;
+
+            return View(model);
         }
+
     }
 }

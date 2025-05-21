@@ -8,8 +8,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DAL.Models;
 
-namespace LMSClassLibrary.Dal
+namespace DAL.Dal
 {
     public class Members
     {
@@ -27,6 +28,8 @@ namespace LMSClassLibrary.Dal
         public DateTime CreatedOn { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+       
+
 
         public Members()
         {

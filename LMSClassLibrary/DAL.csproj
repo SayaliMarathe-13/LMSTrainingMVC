@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dal\BookIssue.cs" />
+    <Compile Include="Dal\BookIssueDetails.cs" />
     <Compile Include="Dal\Books.cs" />
     <Compile Include="Dal\Courses.cs" />
     <Compile Include="Dal\Members.cs" />

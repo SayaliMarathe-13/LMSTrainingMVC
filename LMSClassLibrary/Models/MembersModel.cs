@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LMSClassLibrary.Models
+namespace DAL.Models
 {
     public class MembersModel
     {
@@ -20,5 +20,6 @@ namespace LMSClassLibrary.Models
         public DateTime CreatedOn { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public List<MembersModel> MembersList { get; set; }
     }
 }

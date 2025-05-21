@@ -15,79 +15,109 @@
         @Html.HiddenFor(m => m.CreatedOn)
         @Html.HiddenFor(m => m.CreatedBy)
 
-        <div class="row g-3 mb-4 text-start">
+    <div class="row g-3 mb-4 text-start">
 
-            <!-- Member Select -->
-            <div class="col-md-6">
-                @Html.LabelFor(m => m.MemberId, new { @class = "form-label" })
-                @* You need to pass MembersList as ViewBag or inside a ViewModel *@
-                @Html.DropDownListFor(m => m.MemberId, (SelectList)ViewBag.MembersList, "-- Select Member --", new { @class = "form-select", @id = "MemberId" })
-                @Html.ValidationMessageFor(m => 
-           m.MemberId, "", new { @class = "text-danger" })
-            </div>
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.MemberId, new { @class = "form-label" })
 
-            <!-- Librarian Select -->
-            <div class="col-md-6">
-                @Html.LabelFor(m => m.LibrarianId, new { @class = "form-label" })
-                @Html.DropDownListFor(m => m.LibrarianId, (SelectList)ViewBag.LibrariansList, "-- Select Librarian --", new { @class = "form-select", @id = "LibrarianId" })
-                @Html.ValidationMessageFor(m => m.LibrarianId, "", new { @class = "text-danger" })
-            </div>
-
-            <!-- Issue Date -->
-            <div class="col-md-6">
-                @Html.LabelFor(m => m.IssueDate, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.IssueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "IssueDate" })
-                @Html.ValidationMessageFor(m => m.IssueDate, "", new { @class = "text-danger" })
-            </div>
-
-            <!-- Due Date -->
-            <div class="col-md-6">
-                @Html.LabelFor(m => m.DueDate, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "DueDate" })
-                @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
-            </div>
-
-            <!-- IsActive -->
-            <div class="col-md-12">
-                <div class="form-check">
-                    @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input", @id = "IsActive" })
-                    @Html.LabelFor(m => m.IsActive, new { @class = "form-check-label" })
-                </div>
-            </div>
-
-            <!-- Books label and Add button -->
-            <div class="col-md-12">
-                <label class="form-label">Books</label>
-                <button type="button" class="btn btn-outline-primary ms-3" id="btnAddBook">Add Book</button>
-            </div>
-
-            <!-- Book list table -->
-            <div class="col-md-12">
-                <table class="table table-bordered table-sm">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Book Name</th>
-                            <th>ISBN</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="booksListBody">
-                        <tr>
-                            <td>Sample Book</td>
-                            <td>1234567890</td>
-                            <td><button type="button" class="btn btn-sm btn-danger" disabled>Remove</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            @Html.DropDownListFor(m => m.MemberId,
+                 new SelectList(Model.MembersList, "MemberId", "MemberName"),
+                 "-- Select Member --",
+                 new { @class = "form-select", @id = "MemberId" })
 
         </div>
+        <!-- Librarian TextBox -->
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.LibrarianId, new { @class = "form-label" })
+            @Html.TextBoxFor(m => m.LibrarianId, new { @class = "form-control", @id = "LibrarianId", type = "number" })
+            @Html.ValidationMessageFor(m => m.LibrarianId, "", new { @class = "text-danger" })
+        </div>
+
+
+        <!-- Issue Date -->
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.IssueDate, new { @class = "form-label" })
+            @Html.TextBoxFor(m => m.IssueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "IssueDate" })
+            @Html.ValidationMessageFor(m => m.IssueDate, "", new { @class = "text-danger" })
+        </div>
+
+        <!-- Due Date -->
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.DueDate, new { @class = "form-label" })
+            @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "DueDate" })
+            @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
+        </div>
+
+        <!-- IsActive -->
+        <div class="col-md-12">
+            <div class="form-check">
+                @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input", @id = "IsActive" })
+                @Html.LabelFor(m => m.IsActive, new { @class = "form-check-label" })
+            </div>
+        </div>
+
+        <!-- Books label and Add button -->
+        <div class="col-md-12">
+            <label class="form-label">Books</label>
+            <button type="button" class="btn btn-outline-primary ms-3" id="btnAddBook">Add Book</button>
+        </div>
+
+        <div class="modal fade" id="bookSelectionModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select Books</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="booksListContainer"></div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Book list table -->
+        <div class="col-md-12">
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Book Name</th>
+                        <th>ISBN</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="booksListBody">
+                    <tr>
+                        <td>Sample Book</td>
+                        <td>1234567890</td>
+                        <td><button type="button" class="btn btn-sm btn-danger" disabled>Remove</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 
         <div class="d-flex justify-content-center gap-3 mt-3">
             <button type="submit" class="btn btn-success px-4">
                 @*@(isEdit ? "Update" : "Save")*@
+                Save
             </button>
             <a href="@Url.Action("Index", "IssueBooks")" class="btn btn-secondary px-4">Cancel</a>
         </div>
     }
 </div>
+<script>
+    $('#btnAddBook').click(function () {
+        $.ajax({
+            url: '/Books/GetBooksList',
+            type: 'POST',
+            data: { IsSelectionMode: true},
+            success: function (result) {
+                $('#booksListContainer').html(result);
+                $('#bookSelectionModal').modal('show');
+            }
+        });
+    });
+
+</script>
