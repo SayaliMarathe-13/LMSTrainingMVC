@@ -189,21 +189,11 @@ namespace WebApplication2.Controllers
             return View(model);
         }
         [HttpPost]
-        public JsonResult IssueBooks(BookIssueModel model, string SelectedBookIds)
+        public JsonResult IssueBooks(BookIssueModel model)
         {
             try
             {
-                List<int> selectedBookIds = new List<int>();
-
-                if (!string.IsNullOrEmpty(SelectedBookIds))
-                {
-                    selectedBookIds = SelectedBookIds
-                        .Split(',')
-                        .Select(id => int.Parse(id))
-                        .ToList();
-                }
-
-
+                // Save BookIssue
                 BookIssue bookIssueDal = new BookIssue
                 {
                     MemberId = model.MemberId,
@@ -211,7 +201,7 @@ namespace WebApplication2.Controllers
                     DueDate = model.DueDate.Value,
                     LibrarianId = model.LibrarianId,
                     IsActive = true,
-                    CreatedBy = 1,  
+                    CreatedBy = 1,
                     CreatedOn = DateTime.Now
                 };
 
@@ -222,22 +212,22 @@ namespace WebApplication2.Controllers
                     return Json(new { success = false, message = "Failed to save book issue." });
                 }
 
-
-                foreach (int bookId in selectedBookIds)
+                // ✅ Create BookIssueDetails object with BookIds and Quantities
+                BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
                 {
-                    BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
-                    {
-                        BookIssueId = bookIssueDal.BookIssueId,
-                        BookId = bookId,
-                        IsActive = true,
-                        CreatedBy = 1,
-                        CreatedOn = DateTime.Now
-                    };
+                    BookIssueId = bookIssueDal.BookIssueId,
+                    BookIds = model.SelectedBooks.Select(b => b.BookId).ToList(),
+                    Quantities = model.SelectedBooks.Select(b => b.Quantity).ToList(),
+                    IsActive = true,
+                    CreatedBy = model.CreatedBy,
+                    CreatedOn = DateTime.Now
+                };
 
-                    if (!bookIssueDetailsDal.Save())
-                    {
-                        return Json(new { success = false, message = "Books issued Failed!" });
-                    }
+                bool detailsSaved = bookIssueDetailsDal.Save();
+
+                if (!detailsSaved)
+                {
+                    return Json(new { success = false, message = "Failed to issue books." });
                 }
 
                 return Json(new { success = true, message = "Books issued successfully!" });

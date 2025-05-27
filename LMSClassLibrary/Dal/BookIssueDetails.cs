@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.Data;
+using System.Data.SqlClient;
 
 namespace DAL.Dal
 {
@@ -22,6 +23,8 @@ namespace DAL.Dal
         public DateTime CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public List<int> BookIds { get; set; }
+        public List<int> Quantities { get; set; }
         public BookIssueDetails()
         {
             try
@@ -34,15 +37,16 @@ namespace DAL.Dal
                 throw new Exception("Database initialization failed: " + ex.Message);
             }
         }
+
         public bool Save()
         {
             if (this.BookIssueDetailId == 0)
             {
-                return this.Insert();
+                return Insert();
             }
             else if (this.BookIssueDetailId > 0)
             {
-                return this.Update();
+                return Update();
             }
             else
             {
@@ -51,32 +55,40 @@ namespace DAL.Dal
             }
         }
 
-        public bool Insert()
+        private bool Insert()
         {
-            try
+            DataTable dt = new DataTable();
+            dt.Columns.Add("BookId", typeof(int));        
+            dt.Columns.Add("BookIssueId", typeof(int));    
+            dt.Columns.Add("Quantity", typeof(int));
+            dt.Columns.Add("IsActive", typeof(bool));
+            dt.Columns.Add("CreatedBy", typeof(int));
+            dt.Columns.Add("CreatedOn", typeof(DateTime));
+
+            for (int i = 0; i < BookIds.Count; i++)
             {
-                DbCommand com = this.db.GetStoredProcCommand("BookIssueDetailsInsert");
+                int bookId = BookIds[i];
+                int quantity = (Quantities != null && Quantities.Count > i) ? Quantities[i] : 1;
 
-                // OUTPUT parameter
-                this.db.AddOutParameter(com, "BookIssueDetailId", DbType.Int32, 1024);
-
-                this.db.AddInParameter(com, "BookIssueId", DbType.Int32, this.BookIssueId);
-                this.db.AddInParameter(com, "BookId", DbType.Int32, this.BookId);
-                this.db.AddInParameter(com, "IsActive", DbType.Boolean, this.IsActive);
-                this.db.AddInParameter(com, "CreatedBy", DbType.Int32, this.CreatedBy);
-
-                this.db.ExecuteNonQuery(com);
-
-                this.BookIssueDetailId = Convert.ToInt32(this.db.GetParameterValue(com, "BookIssueDetailId"));
-            }
-            catch (Exception ex)
-            {
-                handler.InsertErrorLog(ex);
-                throw new Exception("Error inserting book issue detail: " + ex.Message);
+                dt.Rows.Add(bookId, BookIssueId, quantity, IsActive, CreatedBy, CreatedOn);
             }
 
-            return this.BookIssueDetailId > 0;
+
+            DbCommand cmd = db.GetStoredProcCommand("BookIssueDetailsInsert");
+
+            SqlParameter param = new SqlParameter("@BookIssueDetails", SqlDbType.Structured)
+            {
+                TypeName = "BookIssueDetailsType",
+                Value = dt
+            };
+
+            cmd.Parameters.Add(param);
+
+            int result = db.ExecuteNonQuery(cmd);
+
+            return result > 0;
         }
+
 
         private bool Update()
         {

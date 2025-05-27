@@ -81,7 +81,9 @@
                             <th>ISBN</th>
                             <th>Publisher</th>
                             <th>Course</th>
+                            <th>Quantity</th>
                             <th>Action</th>
+
                         </tr>
                     </thead>
 
@@ -128,17 +130,21 @@
         });
 
         $('#booksListContainer').on('change', '.book-checkbox', function () {
-            var bookId = $(this).data('book-id');
+            var bookId = parseInt($(this).data('book-id'));
             var isChecked = $(this).is(':checked');
 
             if (isChecked) {
+                const $quantityDropdown = $(`.book-quantity-dropdown[data-book-id="${bookId}"]`);
+                const quantity = parseInt($quantityDropdown.val());
+
                 if (!selectedBooks.some(b => b.BookId === bookId)) {
                     selectedBooks.push({
                         BookId: bookId,
                         BookName: $(this).data('book-name'),
                         ISBN: $(this).data('isbn'),
                         PublisherName: $(this).data('publisher-name'),
-                        CourseName: $(this).data('course-name')
+                        CourseName: $(this).data('course-name'),
+                        Quantity: quantity
                     });
                 }
             } else {
@@ -146,6 +152,17 @@
             }
 
             renderSelectedBooksTable(selectedBooks);
+        });
+
+        $('#booksListContainer').on('change', '.book-quantity-dropdown', function () {
+            var bookId = parseInt($(this).data('book-id'));
+            var newQuantity = parseInt($(this).val());
+
+            var book = selectedBooks.find(b => b.BookId === bookId);
+            if (book) {
+                book.Quantity = newQuantity;
+                renderSelectedBooksTable(selectedBooks); // refresh table
+            }
         });
 
         function renderSelectedBooksTable(books) {
@@ -158,9 +175,11 @@
                 row.append($('<td>').text(book.ISBN));
                 row.append($('<td>').text(book.PublisherName));
                 row.append($('<td>').text(book.CourseName));
+                row.append($('<td>').text(book.Quantity));
                 row.append(
                     $('<td>').html('<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>')
                 );
+
                 tbody.append(row);
             });
         }
@@ -177,47 +196,47 @@
 
 
      $('#issueBookForm').submit(function (e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        var ids = selectedBooks.map(function (book) {
-            return book.BookId;
-        }).join(',');
-
-        $('input[name="SelectedBookIds"]').val(ids);
-
-        var model = {
-            BookIssueId: $('#BookIssueId').val(),
-            MemberId: $('#MemberId').val(),
-            LibrarianId: $('#LibrarianId').val(),
-            IssueDate: $('#IssueDate').val(),
-            DueDate: $('#DueDate').val(),
-            CreatedBy: 1,
-            SelectedBookIds: ids
+    // Build full selected books list with quantities
+    var selectedBookDetails = selectedBooks.map(function (book) {
+        return {
+            BookId: book.BookId,
+            Quantity: book.Quantity
         };
+    });
 
-        $.ajax({
-            url: '@Url.Action("IssueBooks", "Books")',
-            type: 'POST',
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify(model),
-            success: function (response) {
-                if (response.success) {
+    var model = {
+        BookIssueId: $('#BookIssueId').val(),
+        MemberId: $('#MemberId').val(),
+        LibrarianId: $('#LibrarianId').val(),
+        IssueDate: $('#IssueDate').val(),
+        DueDate: $('#DueDate').val(),
+        CreatedBy: 1,
+        SelectedBooks: selectedBookDetails 
+    };
 
-                    alert(response.message);
-                    window.location.href = '@Url.Action("List", "Books")';
-                } else {
-                    alert('Failed: ' + response.message);
-                }
-            },
-            error: function () {
-                alert('An unexpected error occurred while issuing books.');
+    $.ajax({
+        url: '@Url.Action("IssueBooks", "Books")',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(model),
+        success: function (response) {
+            if (response.success) {
+                alert(response.message);
+                window.location.href = '@Url.Action("List", "Books")';
+            } else {
+                alert('Failed: ' + response.message);
             }
-        });
+        },
+        error: function () {
+            alert('An unexpected error occurred while issuing books.');
+        }
+    });
+});
     });
 
-
-    });
+    
 </script>
 
 
