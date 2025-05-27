@@ -115,14 +115,7 @@
                                    data-isbn="@book.ISBN"
                                    data-publisher-name="@book.PublisherName"
                                    data-course-name="@book.CourseName" />
-                            <!-- Quantity dropdown -->
-                            <select class="book-quantity-dropdown ms-2" data-book-id="@book.BookId">
-                                @for (int i = 1; i <= 10; i++)
-                                {
-                                    <option value="@i" @(i == 1 ? "selected" : "")>@i</option>
-                                }
-                            </select>
-
+                           
                         }
 
                         else

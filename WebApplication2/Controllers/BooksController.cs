@@ -212,7 +212,6 @@ namespace WebApplication2.Controllers
                     return Json(new { success = false, message = "Failed to save book issue." });
                 }
 
-                // ✅ Create BookIssueDetails object with BookIds and Quantities
                 BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
                 {
                     BookIssueId = bookIssueDal.BookIssueId,

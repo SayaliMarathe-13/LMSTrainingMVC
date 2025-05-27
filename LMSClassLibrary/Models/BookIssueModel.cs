@@ -28,14 +28,10 @@ namespace DAL.Models
   
         public List<MembersModel> MembersList { get; set; }
         public List<BookIssueDetailsModel> SelectedBooks { get; set; }
-        //public List<BookSelectionModel> SelectedBooks { get; set; }
+        
 
 
 
     }
-    public class BookSelectionModel
-    {
-        public int BookId { get; set; }
-        public int Quantity { get; set; }
-    }
+   
 }

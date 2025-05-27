@@ -14,7 +14,7 @@
         @Html.HiddenFor(m => m.BookIssueId)
         @*@Html.HiddenFor(m => m.CreatedOn)
             @Html.HiddenFor(m => m.CreatedBy)*@
-        @Html.Hidden("SelectedBookIds", "")
+        @*@Html.Hidden("SelectedBookIds", "")*@
 
 
         <div class="row g-3 mb-4 text-start">
@@ -134,9 +134,6 @@
             var isChecked = $(this).is(':checked');
 
             if (isChecked) {
-                const $quantityDropdown = $(`.book-quantity-dropdown[data-book-id="${bookId}"]`);
-                const quantity = parseInt($quantityDropdown.val());
-
                 if (!selectedBooks.some(b => b.BookId === bookId)) {
                     selectedBooks.push({
                         BookId: bookId,
@@ -144,7 +141,7 @@
                         ISBN: $(this).data('isbn'),
                         PublisherName: $(this).data('publisher-name'),
                         CourseName: $(this).data('course-name'),
-                        Quantity: quantity
+                        Quantity: 1 // Default quantity for new book
                     });
                 }
             } else {
@@ -154,28 +151,24 @@
             renderSelectedBooksTable(selectedBooks);
         });
 
-        $('#booksListContainer').on('change', '.book-quantity-dropdown', function () {
-            var bookId = parseInt($(this).data('book-id'));
-            var newQuantity = parseInt($(this).val());
 
-            var book = selectedBooks.find(b => b.BookId === bookId);
-            if (book) {
-                book.Quantity = newQuantity;
-                renderSelectedBooksTable(selectedBooks); // refresh table
-            }
-        });
 
         function renderSelectedBooksTable(books) {
             var tbody = $('#booksListBody');
             tbody.empty();
 
             books.forEach(function (book) {
+                var quantityDropdown = $('<select class="form-select form-select-sm quantity-dropdown" data-book-id="' + book.BookId + '">');
+                for (let i = 1; i <= 10; i++) {
+                    quantityDropdown.append('<option value="' + i + '" ' + (i === book.Quantity ? 'selected' : '') + '>' + i + '</option>');
+                }
+
                 var row = $('<tr>');
                 row.append($('<td>').text(book.BookName));
                 row.append($('<td>').text(book.ISBN));
                 row.append($('<td>').text(book.PublisherName));
                 row.append($('<td>').text(book.CourseName));
-                row.append($('<td>').text(book.Quantity));
+                row.append($('<td>').append(quantityDropdown));
                 row.append(
                     $('<td>').html('<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>')
                 );
@@ -183,6 +176,8 @@
                 tbody.append(row);
             });
         }
+
+
 
         $('#selectedBooksContainer').on('click', '.remove-book', function () {
             var bookId = $(this).data('book-id');
@@ -194,11 +189,22 @@
             $('.book-checkbox[data-book-id="' + bookId + '"]').prop('checked', false);
         });
 
+        $('#selectedBooksContainer').on('change', '.quantity-dropdown', function () {
+            var bookId = parseInt($(this).data('book-id'));
+            var newQuantity = parseInt($(this).val());
+
+            var book = selectedBooks.find(b => b.BookId === bookId);
+            if (book) {
+                book.Quantity = newQuantity;
+            }
+        });
+
+
 
      $('#issueBookForm').submit(function (e) {
     e.preventDefault();
 
-    // Build full selected books list with quantities
+
     var selectedBookDetails = selectedBooks.map(function (book) {
         return {
             BookId: book.BookId,
@@ -213,7 +219,7 @@
         IssueDate: $('#IssueDate').val(),
         DueDate: $('#DueDate').val(),
         CreatedBy: 1,
-        SelectedBooks: selectedBookDetails 
+        SelectedBooks: selectedBookDetails
     };
 
     $.ajax({
@@ -236,7 +242,7 @@
 });
     });
 
-    
+
 </script>
 
 
