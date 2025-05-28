@@ -2,6 +2,8 @@
 using System;
 using System.Data.Common;
 using System.Data;
+using DAL.Models;
+using System.Collections.Generic;
 
 namespace DAL.Dal
 {
@@ -20,6 +22,9 @@ namespace DAL.Dal
         public DateTime? CreatedOn { get; set; }
         public int ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public int TotalRecords { get; set; }
         public BookIssue()
         {
             try
@@ -32,6 +37,45 @@ namespace DAL.Dal
                 throw new Exception("Database initialization failed: " + ex.Message);
             }
         }
+
+        public List<BookIssueModel> GetBookIssueList()
+        {
+            List<BookIssueModel> bookIssueList = new List<BookIssueModel>();
+
+            try
+            {
+                DbCommand cmd = db.GetStoredProcCommand("BookIssueGetList");
+
+                DataSet ds = db.ExecuteDataSet(cmd);
+
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        BookIssueModel issue = new BookIssueModel
+                        {
+                            BookIssueId = Convert.ToInt32(row["BookIssueId"]),
+                            MemberName = Convert.ToString(row["MemberName"]),
+                            IssueDate = Convert.ToDateTime(row["IssueDate"]),
+                            DueDate = Convert.ToDateTime(row["DueDate"]),
+                            ReturnDate = row["ReturnDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["ReturnDate"]) : null,
+                            LibrarianName = Convert.ToString(row["LibrarianName"]),
+                            IsActive = row["IsActive"] != DBNull.Value ? Convert.ToBoolean(row["IsActive"]) : false
+                        };
+
+                        bookIssueList.Add(issue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                throw new Exception("Error fetching book issue list: " + ex.Message);
+            }
+
+            return bookIssueList;
+        }
+
         public bool Save()
         {
             if (this.BookIssueId == 0)

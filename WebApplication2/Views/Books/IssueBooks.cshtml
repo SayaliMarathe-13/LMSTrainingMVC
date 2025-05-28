@@ -1,17 +1,16 @@
 ﻿@model DAL.Models.BookIssueModel
 
 @{
-    //var isEdit = Model.BookIssueId > 0;
-    //ViewBag.Title = isEdit ? "Edit Issue Book" : "Issue Book";
-
+    string pageMode = ViewBag.PageMode as string ?? "Add";
+    ViewBag.Title = pageMode == "Edit" ? "Edit Book Issue" : "Issue New Book";
 }
 
-<h3 class="text-center text-primary fw-bold">Issue Book</h3>
+<h2>@ViewBag.Title</h2>
 
 <div class="container mt-5 pt-5">
     @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "issueBookForm" }))
     {
-        @Html.HiddenFor(m => m.BookIssueId)
+        @Html.HiddenFor(model => model.BookIssueId)
         @*@Html.HiddenFor(m => m.CreatedOn)
             @Html.HiddenFor(m => m.CreatedBy)*@
         @*@Html.Hidden("SelectedBookIds", "")*@
@@ -71,25 +70,41 @@
             </div>
 
 
-
             <!-- Book list table -->
             <div class="col-md-12" id="selectedBooksContainer">
-                <table class="table table-bordered table-sm">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Book Name</th>
-                            <th>ISBN</th>
-                            <th>Publisher</th>
-                            <th>Course</th>
-                            <th>Quantity</th>
-                            <th>Action</th>
+                
 
-                        </tr>
-                    </thead>
+                @if (Model.IssuedBooks != null && Model.IssuedBooks.Any())
+                {
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Book Name</th>
+                                <th>ISBN</th>
+                                <th>Publisher</th>
+                                <th>Course</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model.IssuedBooks)
+                            {
+                                <tr>
+                                    <td>@book.BookName</td>
+                                    <td>@book.ISBN</td>
+                                    <td>@book.PublisherName</td>
+                                    <td>@book.CourseName</td>
+                                    <td>@book.Quantity</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No issued books found.</p>
+                }
 
-                    <tbody id="booksListBody">
-                    </tbody>
-                </table>
             </div>
         </div>
 

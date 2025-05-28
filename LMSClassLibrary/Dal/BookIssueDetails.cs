@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using System.Data.SqlClient;
+using LMSClassLibrary.Models;
 
 namespace DAL.Dal
 {
@@ -37,6 +38,44 @@ namespace DAL.Dal
                 throw new Exception("Database initialization failed: " + ex.Message);
             }
         }
+
+        public List<BookIssueDetailsModel> GetIssuedBooksByIssueId()
+        {
+            List<BookIssueDetailsModel> issuedBooks = new List<BookIssueDetailsModel>();
+
+            try
+            {
+                DbCommand cmd = db.GetStoredProcCommand("BookIssueDetailsGetByIssueId");
+                db.AddInParameter(cmd, "@BookIssueId", DbType.Int32, this.BookIssueId);
+
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        BookIssueDetailsModel bookIssueDetailsModel = new BookIssueDetailsModel
+                        {
+                            BookIssueId = Convert.ToInt32(reader["BookIssueId"]),
+                            BookId = Convert.ToInt32(reader["BookId"]),
+                            BookName = Convert.ToString(reader["BookName"]),
+                            ISBN = Convert.ToString(reader["ISBN"]),
+                            PublisherName = Convert.ToString(reader["PublisherName"]),
+                            CourseName = Convert.ToString(reader["CourseName"]),
+                            Quantity = Convert.ToInt32(reader["Quantity"])
+                        };
+
+                        issuedBooks.Add(bookIssueDetailsModel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                throw new Exception("Error loading issued book details: " + ex.Message);
+            }
+
+            return issuedBooks;
+        }
+
 
         public bool Save()
         {

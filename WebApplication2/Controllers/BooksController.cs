@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System;
 using DAL.Dal;
+using LMSClassLibrary.Models;
 
 namespace WebApplication2.Controllers
 {
@@ -173,21 +174,58 @@ namespace WebApplication2.Controllers
             }
         }
 
-        public ActionResult IssueBooks()
+        public ActionResult IssueBooks(int? id)
         {
-            var model = new BookIssueModel();
+            try
+            {
+                var model = new BookIssueModel();
+                var membersDal = new Members();
+                model.MembersList = membersDal.GetAllMemberNames();
+
+                if (id.HasValue && id.Value > 0)
+                {
+                    var issue = new BookIssue { BookIssueId = id.Value };
+                    var bookIssueDetails = new BookIssueDetails { BookIssueId = id.Value };
+                    model.IssuedBooks = bookIssueDetails.GetIssuedBooksByIssueId();
+
+                    if (!issue.Load())
+                    {
+                        return HttpNotFound("Book issue not found");
+                    }
            
-            var Membersdal = new Members();
-            model.MembersList = Membersdal.GetAllMemberNames();
+                    // Map entity to model
+                    model.BookIssueId = issue.BookIssueId;
+                    model.MemberId = issue.MemberId;
+                    model.IssueDate = issue.IssueDate ?? DateTime.Today;
+                    model.DueDate = issue.DueDate ?? DateTime.Today.AddDays(7);
+                    model.ReturnDate = issue.ReturnDate;
+                    model.LibrarianId = issue.LibrarianId;
+                    model.IsActive = issue.IsActive;
 
-            model.LibrarianId = 1;
+                    ViewBag.PageMode = "Edit";
+                }
+                else
+                {
+                    // Default values for new issue
+                    model.LibrarianId = 1;
+                    model.IssueDate = DateTime.Today;
+                    model.DueDate = DateTime.Today.AddDays(7);
+                    model.IsActive = true;
 
-            model.IssueDate = DateTime.Today;
-            model.DueDate = DateTime.Today.AddDays(7);
-            model.IsActive = true;
+                    ViewBag.PageMode = "Add";
+                }
+           
+                return View(model);
 
-            return View(model);
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
+                return View("Error");
+            }
         }
+
         [HttpPost]
         public JsonResult IssueBooks(BookIssueModel model)
         {
@@ -237,6 +275,27 @@ namespace WebApplication2.Controllers
                 return Json(new { success = false, message = "Error occurred while issuing books." });
             }
         }
+        public ActionResult IssueBookList()
+        {
+            try
+            {
+                BookIssue bookIssueDal = new BookIssue();
+
+                var model = new BookIssueModel
+                {
+                    IssueBookList = bookIssueDal.GetBookIssueList()
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
+                return View("Error");
+            }
+        }
+
 
 
     }

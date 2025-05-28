@@ -1,0 +1,127 @@
+﻿@model DAL.Models.BookIssueModel
+
+@{
+    ViewBag.Title = "Book Issue List";
+    int totalPages = (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize);
+    int startRecord = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+    int endRecord = startRecord + Model.IssueBookList.Count() - 1;
+}
+
+<div class="mb-4">
+    <h2>Book Issue List</h2>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Issue ID</th>
+            <th>Member Name</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Librarian Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.IssueBookList != null && Model.IssueBookList.Count > 0)
+        {
+            foreach (var issue in Model.IssueBookList)
+            {
+                <tr>
+                    <td class="text-center">@issue.BookIssueId</td>
+                    <td class="text-center">@issue.MemberName</td>
+                    <td class="text-center">@((issue.IssueDate.HasValue) ? issue.IssueDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                    <td class="text-center">@((issue.DueDate.HasValue) ? issue.DueDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                    <td class="text-center">@((issue.ReturnDate.HasValue) ? issue.ReturnDate.Value.ToString("yyyy-MM-dd") : "Not Returned")</td>
+                    <td class="text-center">@issue.LibrarianName</td>
+                    <td class="text-center">
+                        <span class="badge @(issue.IsActive ? "bg-success" : "bg-danger")">
+                            @(issue.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-inline-flex">
+                            <a href="@Url.Action("IssueBooks", "Books", new { id = issue.BookIssueId })"
+                               class="btn btn-outline-primary btn-sm me-2"
+                               title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-center">No book issues found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@*<div>
+    @if (Model.TotalRecords > 0)
+    {
+        <h5>Showing records @startRecord to @endRecord of total @Model.TotalRecords records.</h5>
+    }
+    else
+    {
+        <h5>No records found.</h5>
+    }
+</div>*@
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="d-flex align-items-center">
+        <label for="PageSizeSelector" class="me-2 mb-0">Records per page:</label>
+        <select id="PageSizeSelector" class="form-select" style="width: auto;">
+            @for (int i = 5; i <= 20; i += 5)
+            {
+                <option value="@i" @(Model.PageSize == i ? "selected" : "")>@i</option>
+            }
+        </select>
+    </div>
+
+    <ul class="pagination mb-0">
+        @if (Model.PageNumber > 1)
+        {
+            <li class="page-item">
+                <button type="button" class="page-link pagination-button" data-page="@(Model.PageNumber - 1)">Previous</button>
+            </li>
+        }
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                <button type="button" class="page-link pagination-button" data-page="@i">@i</button>
+            </li>
+        }
+        @if (Model.PageNumber < totalPages)
+        {
+            <li class="page-item">
+                <button type="button" class="page-link pagination-button" data-page="@(Model.PageNumber + 1)">Next</button>
+            </li>
+        }
+    </ul>
+</div>
+
+@section Scripts {
+    <script>
+        $('#PageSizeSelector').on('change', function () {
+            const pageSize = $(this).val();
+            const url = new URL(window.location.href);
+            url.searchParams.set('pageSize', pageSize);
+            url.searchParams.set('page', 1); // Reset to page 1 when page size changes
+            window.location.href = `${url.toString()}`;
+        });
+
+        $('.pagination-button').on('click', function () {
+            const page = $(this).data('page');
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = `${url.toString()}`;
+        });
+    </script>
+}
+

@@ -11,6 +11,10 @@ namespace LMSClassLibrary.Models
         public int BookIssueDetailsId { get; set; }
         public int BookIssueId { get; set; }
         public int BookId { get; set; }
+        public string BookName { get; set; }
+        public string ISBN { get; set; }
+        public string PublisherName { get; set; }
+        public string CourseName { get; set; }
         public bool IsActive { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }

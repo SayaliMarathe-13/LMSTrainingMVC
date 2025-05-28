@@ -80,6 +80,7 @@
     <Compile Include="Dal\BookIssueDetails.cs" />
     <Compile Include="Dal\Books.cs" />
     <Compile Include="Dal\Courses.cs" />
+    <Compile Include="Dal\Librarians.cs" />
     <Compile Include="Dal\Members.cs" />
     <Compile Include="FileLogger\FileLogger.cs" />
     <Compile Include="Dal\Handler.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Models\BooksModel.cs" />
     <Compile Include="Models\CoursesModel.cs" />
     <Compile Include="Models\DepartmentsModel.cs" />
+    <Compile Include="Models\LibrariansModel.cs" />
     <Compile Include="Models\MembersModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\PublishersModel.cs" />
