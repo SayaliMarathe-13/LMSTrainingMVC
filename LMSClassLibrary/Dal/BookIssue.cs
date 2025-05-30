@@ -20,7 +20,7 @@ namespace DAL.Dal
         public bool IsActive { get; set; }
         public int CreatedBy { get; set; }
         public DateTime? CreatedOn { get; set; }
-        public int ModifiedBy { get; set; }
+        public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
@@ -182,7 +182,6 @@ namespace DAL.Dal
                     this.db.AddInParameter(com, "ReturnDate", DbType.Date, DBNull.Value);
 
                 this.db.AddInParameter(com, "LibrarianId", DbType.Int32, this.LibrarianId);
-                this.db.AddInParameter(com, "IsActive", DbType.Boolean, this.IsActive);
                 this.db.AddInParameter(com, "ModifiedBy", DbType.Int32, this.ModifiedBy);
                 this.db.AddInParameter(com, "ModifiedOn", DbType.DateTime, this.ModifiedOn);
 

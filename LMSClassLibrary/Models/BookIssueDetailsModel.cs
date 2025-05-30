@@ -8,7 +8,7 @@ namespace LMSClassLibrary.Models
 {
     public class BookIssueDetailsModel
     {
-        public int BookIssueDetailsId { get; set; }
+        public int BookIssueDetailId { get; set; }
         public int BookIssueId { get; set; }
         public int BookId { get; set; }
         public string BookName { get; set; }
@@ -21,6 +21,8 @@ namespace LMSClassLibrary.Models
         public int ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public int Quantity { get; set; }
+
+        public bool IsNew { get; set; }
 
     }
 }

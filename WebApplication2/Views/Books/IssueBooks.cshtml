@@ -1,19 +1,24 @@
 ﻿@model DAL.Models.BookIssueModel
 
 @{
-    string pageMode = ViewBag.PageMode as string ?? "Add";
-    ViewBag.Title = pageMode == "Edit" ? "Edit Book Issue" : "Issue New Book";
+    var isEdit = Model.BookIssueId > 0;
+    ViewBag.Title = isEdit ? "Edit Issue Book" : "Issue Book";
+
 }
 
-<h2>@ViewBag.Title</h2>
+<h3 class="text-center text-primary fw-bold">Issue Book</h3>
 
 <div class="container mt-5 pt-5">
     @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "issueBookForm" }))
     {
-        @Html.HiddenFor(model => model.BookIssueId)
-        @*@Html.HiddenFor(m => m.CreatedOn)
-            @Html.HiddenFor(m => m.CreatedBy)*@
-        @*@Html.Hidden("SelectedBookIds", "")*@
+        @Html.HiddenFor(m => m.BookIssueId)
+
+        if (isEdit)
+        {
+            @Html.HiddenFor(m => m.CreatedOn)
+            @Html.HiddenFor(m => m.CreatedBy)
+        }
+
 
 
         <div class="row g-3 mb-4 text-start">
@@ -70,41 +75,25 @@
             </div>
 
 
+
             <!-- Book list table -->
             <div class="col-md-12" id="selectedBooksContainer">
-                
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Book Name</th>
+                            <th>ISBN</th>
+                            <th>Publisher</th>
+                            <th>Course</th>
+                            <th>Quantity</th>
+                            <th>Action</th>
 
-                @if (Model.IssuedBooks != null && Model.IssuedBooks.Any())
-                {
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Book Name</th>
-                                <th>ISBN</th>
-                                <th>Publisher</th>
-                                <th>Course</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var book in Model.IssuedBooks)
-                            {
-                                <tr>
-                                    <td>@book.BookName</td>
-                                    <td>@book.ISBN</td>
-                                    <td>@book.PublisherName</td>
-                                    <td>@book.CourseName</td>
-                                    <td>@book.Quantity</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <p>No issued books found.</p>
-                }
+                        </tr>
+                    </thead>
 
+                    <tbody id="booksListBody">
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -123,6 +112,24 @@
 
         var selectedBooks = [];
 
+        // 🔁 If editing, populate the selectedBooks array from the Model.IssuedBooks (server-rendered JS object)
+        @if (Model.IssuedBooks != null && Model.IssuedBooks.Any())
+        {
+           <text>
+                selectedBooks = @Html.Raw(Json.Encode(Model.IssuedBooks.Select(b => new {
+                    b.BookId,
+                    b.BookName,
+                    b.ISBN,
+                    b.PublisherName,
+                    b.CourseName,
+                    Quantity = b.Quantity,
+                    IsNew = false // ✅ existing books
+                })));
+                renderSelectedBooksTable(selectedBooks);
+           </text>
+
+        }
+
         $('#btnAddBook').click(function () {
             $.ajax({
                 url: '/Books/GetBooksList',
@@ -131,7 +138,7 @@
                 success: function (result) {
                     $('#booksListContainer').html(result);
 
-                    // Re-check previously selected books in modal
+                    // Re-check already selected books
                     selectedBooks.forEach(function (book) {
                         $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
                     });
@@ -156,8 +163,10 @@
                         ISBN: $(this).data('isbn'),
                         PublisherName: $(this).data('publisher-name'),
                         CourseName: $(this).data('course-name'),
-                        Quantity: 1 // Default quantity for new book
+                        Quantity: 1,
+                        IsNew: true 
                     });
+
                 }
             } else {
                 selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
@@ -166,8 +175,6 @@
             renderSelectedBooksTable(selectedBooks);
         });
 
-
-
         function renderSelectedBooksTable(books) {
             var tbody = $('#booksListBody');
             tbody.empty();
@@ -175,7 +182,7 @@
             books.forEach(function (book) {
                 var quantityDropdown = $('<select class="form-select form-select-sm quantity-dropdown" data-book-id="' + book.BookId + '">');
                 for (let i = 1; i <= 10; i++) {
-                    quantityDropdown.append('<option value="' + i + '" ' + (i === book.Quantity ? 'selected' : '') + '>' + i + '</option>');
+                    quantityDropdown.append('<option value="' + i + '" ' + (i == book.Quantity ? 'selected' : '') + '>' + i + '</option>');
                 }
 
                 var row = $('<tr>');
@@ -191,8 +198,6 @@
                 tbody.append(row);
             });
         }
-
-
 
         $('#selectedBooksContainer').on('click', '.remove-book', function () {
             var bookId = $(this).data('book-id');
@@ -214,50 +219,48 @@
             }
         });
 
+        $('#issueBookForm').submit(function (e) {
+            e.preventDefault();
 
+            var selectedBookDetails = selectedBooks.map(function (book) {
+                return {
+                    BookId: book.BookId,
+                    Quantity: book.Quantity,
+                    IsNew: book.IsNew 
+                };
+            });
 
-     $('#issueBookForm').submit(function (e) {
-    e.preventDefault();
+            var model = {
+                BookIssueId: $('#BookIssueId').val(),
+                MemberId: $('#MemberId').val(),
+                LibrarianId: $('#LibrarianId').val(),
+                IssueDate: $('#IssueDate').val(),
+                DueDate: $('#DueDate').val(),
+                CreatedBy: 1,
+                SelectedBooks: selectedBookDetails
+            };
 
+            $.ajax({
+                url: '@Url.Action("IssueBooks", "Books")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.location.href = '@Url.Action("List", "Books")';
+                    } else {
+                        alert('Failed: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('An unexpected error occurred while issuing books.');
+                }
+            });
+        });
 
-    var selectedBookDetails = selectedBooks.map(function (book) {
-        return {
-            BookId: book.BookId,
-            Quantity: book.Quantity
-        };
     });
-
-    var model = {
-        BookIssueId: $('#BookIssueId').val(),
-        MemberId: $('#MemberId').val(),
-        LibrarianId: $('#LibrarianId').val(),
-        IssueDate: $('#IssueDate').val(),
-        DueDate: $('#DueDate').val(),
-        CreatedBy: 1,
-        SelectedBooks: selectedBookDetails
-    };
-
-    $.ajax({
-        url: '@Url.Action("IssueBooks", "Books")',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(model),
-        success: function (response) {
-            if (response.success) {
-                alert(response.message);
-                window.location.href = '@Url.Action("List", "Books")';
-            } else {
-                alert('Failed: ' + response.message);
-            }
-        },
-        error: function () {
-            alert('An unexpected error occurred while issuing books.');
-        }
-    });
-});
-    });
-
-
 </script>
+
 
 

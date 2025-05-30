@@ -22,7 +22,7 @@ namespace DAL.Dal
         public bool IsActive { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
-        public int ModifiedBy { get; set; }
+        public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public List<int> BookIds { get; set; }
         public List<int> Quantities { get; set; }
@@ -46,10 +46,12 @@ namespace DAL.Dal
             try
             {
                 DbCommand cmd = db.GetStoredProcCommand("BookIssueDetailsGetByIssueId");
+                Console.WriteLine("BookIssueId = " + this.BookIssueId);
                 db.AddInParameter(cmd, "@BookIssueId", DbType.Int32, this.BookIssueId);
 
                 using (IDataReader reader = db.ExecuteReader(cmd))
                 {
+                    Console.WriteLine("Field count: " + reader.FieldCount);
                     while (reader.Read())
                     {
                         BookIssueDetailsModel bookIssueDetailsModel = new BookIssueDetailsModel
@@ -129,7 +131,7 @@ namespace DAL.Dal
         }
 
 
-        private bool Update()
+        public bool Update()
         {
             try
             {
