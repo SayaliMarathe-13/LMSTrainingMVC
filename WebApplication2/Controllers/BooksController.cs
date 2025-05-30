@@ -252,6 +252,8 @@ namespace WebApplication2.Controllers
                     return Json(new { success = false, message = "Failed to save book issue." });
                 }
 
+                string message = model.BookIssueId == 0 ? "Book issue created successfully." : "Book issue updated successfully.";
+
                 // Save only new books in details
                 var newBooks = model.SelectedBooks.Where(b => b.IsNew).ToList();
 
@@ -275,6 +277,7 @@ namespace WebApplication2.Controllers
                     {
                         return Json(new { success = false, message = "Failed to issue new books." });
                     }
+                  
                 }
 
                 // Update existing books quantities if changed
@@ -288,22 +291,21 @@ namespace WebApplication2.Controllers
                     {
                         BookIssueId = bookIssueDal.BookIssueId,
                         BookIssueDetailIds = updatedBooks.Select(b => b.BookIssueDetailId).ToList(),
-                        //BookIds = updatedBooks.Select(b => b.BookId).ToList(),
                         Quantities = updatedBooks.Select(b => b.Quantity).ToList(),
                         ModifiedBy = 1,
                         ModifiedOn = DateTime.Now
                     };
 
-                    // Calls internal Update() via Save()
                     bool updated = bookIssueDetailsDal.Save();
 
                     if (!updated)
                     {
                         return Json(new { success = false, message = "Failed to update book issue details." });
                     }
+                    message = " Book issue details updated successfully.";
                 }
 
-                return Json(new { success = true, message = "Books issued successfully." });
+                return Json(new { success = true, message });
             }
             catch (Exception ex)
             {
@@ -311,6 +313,7 @@ namespace WebApplication2.Controllers
                 return Json(new { success = false, message = "Error occurred while issuing books." });
             }
         }
+
 
         public ActionResult IssueBookList()
         {
