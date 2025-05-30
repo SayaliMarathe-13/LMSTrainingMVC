@@ -17,8 +17,10 @@ namespace DAL.Dal
         private Handler handler = new Handler();
         private readonly Database db;
         public int BookIssueDetailId { get; set; }
+        public List<int> BookIssueDetailIds { get; set; }
         public int BookIssueId { get; set; }
         public int BookId { get; set; }
+        public int Quantity { get; set; }
         public bool IsActive { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
@@ -56,6 +58,7 @@ namespace DAL.Dal
                     {
                         BookIssueDetailsModel bookIssueDetailsModel = new BookIssueDetailsModel
                         {
+                            BookIssueDetailId = Convert.ToInt32(reader["BookIssueDetailId"]),
                             BookIssueId = Convert.ToInt32(reader["BookIssueId"]),
                             BookId = Convert.ToInt32(reader["BookId"]),
                             BookName = Convert.ToString(reader["BookName"]),
@@ -131,29 +134,50 @@ namespace DAL.Dal
         }
 
 
-        public bool Update()
+        private bool Update()
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("BookIssueDetailsUpdate");
+                // Prepare DataTable for batch update using the properties of this object
+                DataTable dt = new DataTable();
+                dt.Columns.Add("BookIssueDetailId", typeof(int));
+                dt.Columns.Add("Quantity", typeof(int));
+                dt.Columns.Add("ModifiedBy", typeof(int));
+                dt.Columns.Add("ModifiedOn", typeof(DateTime));
 
-                this.db.AddInParameter(com, "BookIssueDetailId", DbType.Int32, this.BookIssueDetailId);
-                this.db.AddInParameter(com, "BookIssueId", DbType.Int32, this.BookIssueId);
-                this.db.AddInParameter(com, "BookId", DbType.Int32, this.BookId);
-                this.db.AddInParameter(com, "IsActive", DbType.Boolean, this.IsActive);
-                this.db.AddInParameter(com, "ModifiedBy", DbType.Int32, this.ModifiedBy);
-                this.db.AddInParameter(com, "ModifiedOn", DbType.DateTime, this.ModifiedOn);
+                // Assuming this.BookIssueDetailIds, this.Quantities, etc. are all Lists of same length
+                for (int i = 0; i < BookIssueDetailIds.Count; i++)
+                {
+                    dt.Rows.Add(
+                        BookIssueDetailIds[i],
+                        Quantities[i],
+                        ModifiedBy,
+                        ModifiedOn
+                    );
+                }
 
-                this.db.ExecuteNonQuery(com);
+                DbCommand com = db.GetStoredProcCommand("BookIssueDetailsUpdate");
+
+                var param = new SqlParameter("@UpdateTable", SqlDbType.Structured)
+                {
+                    TypeName = "dbo.BookIssueDetailsUpdateType",
+                    Value = dt
+                };
+
+                com.Parameters.Add(param);
+
+                db.ExecuteNonQuery(com);
+
+                return true;
             }
             catch (Exception ex)
             {
                 handler.InsertErrorLog(ex);
-                throw new Exception("Error updating BookIssueDetail: " + ex.Message);
+                throw new Exception("Error updating BookIssueDetails: " + ex.Message);
             }
-
-            return true;
         }
+
+
 
     }
 }

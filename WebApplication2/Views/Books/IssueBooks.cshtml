@@ -117,14 +117,16 @@
         {
            <text>
                 selectedBooks = @Html.Raw(Json.Encode(Model.IssuedBooks.Select(b => new {
-                    b.BookId,
-                    b.BookName,
-                    b.ISBN,
-                    b.PublisherName,
-                    b.CourseName,
-                    Quantity = b.Quantity,
-                    IsNew = false // ✅ existing books
-                })));
+                               b.BookId,
+                               b.BookIssueDetailId,
+                               b.BookName,
+                               b.ISBN,
+                               b.PublisherName,
+                               b.CourseName,
+                               Quantity = b.Quantity,
+                               IsNew = false, // ✅ existing books
+                               QuantityChanged = false
+                           })));
                 renderSelectedBooksTable(selectedBooks);
            </text>
 
@@ -215,9 +217,15 @@
 
             var book = selectedBooks.find(b => b.BookId === bookId);
             if (book) {
+                if (book.Quantity !== newQuantity) {
+                    book.QuantityChanged = true;
+                } else {
+                    book.QuantityChanged = false;
+                }
                 book.Quantity = newQuantity;
             }
         });
+
 
         $('#issueBookForm').submit(function (e) {
             e.preventDefault();
@@ -225,11 +233,14 @@
             var selectedBookDetails = selectedBooks.map(function (book) {
                 return {
                     BookId: book.BookId,
+                    BookIssueDetailId: book.BookIssueDetailId || 0,
                     Quantity: book.Quantity,
-                    IsNew: book.IsNew 
+                    IsNew: book.IsNew || false,
+                    QuantityChanged: book.QuantityChanged || false
                 };
             });
-
+            var changedBooks = selectedBookDetails.filter(b => b.QuantityChanged || b.IsNew);
+            console.log(changedBooks)
             var model = {
                 BookIssueId: $('#BookIssueId').val(),
                 MemberId: $('#MemberId').val(),
@@ -237,6 +248,7 @@
                 IssueDate: $('#IssueDate').val(),
                 DueDate: $('#DueDate').val(),
                 CreatedBy: 1,
+                ChangedBooks: changedBooks,
                 SelectedBooks: selectedBookDetails
             };
 
@@ -246,9 +258,10 @@
                 contentType: 'application/json',
                 data: JSON.stringify(model),
                 success: function (response) {
+                    debugger;
                     if (response.success) {
                         alert(response.message);
-                        window.location.href = '@Url.Action("List", "Books")';
+                        window.location.href = '@Url.Action("IssueBookList", "Books")';
                     } else {
                         alert('Failed: ' + response.message);
                     }

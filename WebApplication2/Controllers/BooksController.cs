@@ -240,9 +240,9 @@ namespace WebApplication2.Controllers
                     LibrarianId = model.LibrarianId,
                     IsActive = true,
                     CreatedBy = 1,
-                    CreatedOn =model.BookIssueId == 0 ? DateTime.Now : model.CreatedOn,
+                    CreatedOn = model.BookIssueId == 0 ? DateTime.Now : model.CreatedOn,
                     ModifiedBy = model.BookIssueId > 0 ? 1 : (int?)null,
-                    ModifiedOn = model.BookIssueId > 0 ?  DateTime.Now : (DateTime?)null
+                    ModifiedOn = model.BookIssueId > 0 ? DateTime.Now : (DateTime?)null
                 };
 
                 bool isBookIssueSaved = bookIssueDal.Save();
@@ -259,7 +259,6 @@ namespace WebApplication2.Controllers
                 {
                     BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
                     {
-                        
                         BookIssueId = bookIssueDal.BookIssueId,
                         BookIds = newBooks.Select(b => b.BookId).ToList(),
                         Quantities = newBooks.Select(b => b.Quantity).ToList(),
@@ -278,7 +277,33 @@ namespace WebApplication2.Controllers
                     }
                 }
 
-                return Json(new { success = true, message = "Books issued successfully!" });
+                // Update existing books quantities if changed
+                var updatedBooks = model.SelectedBooks
+                    .Where(b => b.QuantityChanged && !b.IsNew)
+                    .ToList();
+
+                if (updatedBooks.Count > 0)
+                {
+                    BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
+                    {
+                        BookIssueId = bookIssueDal.BookIssueId,
+                        BookIssueDetailIds = updatedBooks.Select(b => b.BookIssueDetailId).ToList(),
+                        BookIds = updatedBooks.Select(b => b.BookId).ToList(),
+                        Quantities = updatedBooks.Select(b => b.Quantity).ToList(),
+                        ModifiedBy = 1,
+                        ModifiedOn = DateTime.Now
+                    };
+
+                    // Calls internal Update() via Save()
+                    bool updated = bookIssueDetailsDal.Save();
+
+                    if (!updated)
+                    {
+                        return Json(new { success = false, message = "Failed to update book issue details." });
+                    }
+                }
+
+                return Json(new { success = true, message = "Books issued successfully." });
             }
             catch (Exception ex)
             {
