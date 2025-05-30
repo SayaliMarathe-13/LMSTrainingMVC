@@ -3,7 +3,6 @@
 @{
     var isEdit = Model.BookIssueId > 0;
     ViewBag.Title = isEdit ? "Edit Issue Book" : "Issue Book";
-
 }
 
 <h3 class="text-center text-primary fw-bold">Issue Book</h3>
@@ -19,44 +18,33 @@
             @Html.HiddenFor(m => m.CreatedBy)
         }
 
-
-
         <div class="row g-3 mb-4 text-start">
-
             <div class="col-md-6">
                 @Html.LabelFor(m => m.MemberId, new { @class = "form-label" })
-
                 @Html.DropDownListFor(m => m.MemberId,
                      new SelectList(Model.MembersList, "MemberId", "MemberName"),
                      "-- Select Member --",
                      new { @class = "form-select", @id = "MemberId" })
-
             </div>
-            <!-- Librarian TextBox -->
+
             <div class="col-md-6">
                 @Html.LabelFor(m => m.LibrarianId, new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.LibrarianId, new { @class = "form-control", @id = "LibrarianId", type = "number" })
                 @Html.ValidationMessageFor(m => m.LibrarianId, "", new { @class = "text-danger" })
             </div>
 
-
-            <!-- Issue Date -->
             <div class="col-md-6">
                 @Html.LabelFor(m => m.IssueDate, new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.IssueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "IssueDate" })
                 @Html.ValidationMessageFor(m => m.IssueDate, "", new { @class = "text-danger" })
             </div>
 
-            <!-- Due Date -->
             <div class="col-md-6">
                 @Html.LabelFor(m => m.DueDate, new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "DueDate" })
                 @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
             </div>
 
-
-
-            <!-- Books label and Add button -->
             <div class="col-md-12">
                 <label class="form-label">Books</label>
                 <button type="button" class="btn btn-outline-primary ms-3" id="btnAddBook">Add Book</button>
@@ -74,9 +62,6 @@
                 </div>
             </div>
 
-
-
-            <!-- Book list table -->
             <div class="col-md-12" id="selectedBooksContainer">
                 <table class="table table-bordered table-sm">
                     <thead class="table-light">
@@ -87,17 +72,13 @@
                             <th>Course</th>
                             <th>Quantity</th>
                             <th>Action</th>
-
                         </tr>
                     </thead>
-
                     <tbody id="booksListBody">
                     </tbody>
                 </table>
             </div>
         </div>
-
-
 
         <div class="d-flex justify-content-center gap-3 mt-3">
             <button type="submit" class="btn btn-success px-4">
@@ -107,12 +88,13 @@
         </div>
     }
 </div>
+
 <script>
     $(document).ready(function () {
 
         var selectedBooks = [];
 
-        // 🔁 If editing, populate the selectedBooks array from the Model.IssuedBooks (server-rendered JS object)
+        // Populate selectedBooks if editing
         @if (Model.IssuedBooks != null && Model.IssuedBooks.Any())
         {
            <text>
@@ -124,14 +106,14 @@
                                b.PublisherName,
                                b.CourseName,
                                Quantity = b.Quantity,
-                               IsNew = false, // ✅ existing books
+                               IsNew = false,
                                QuantityChanged = false
                            })));
                 renderSelectedBooksTable(selectedBooks);
            </text>
-
         }
 
+        // Open modal and load book list
         $('#btnAddBook').click(function () {
             $.ajax({
                 url: '/Books/GetBooksList',
@@ -140,7 +122,7 @@
                 success: function (result) {
                     $('#booksListContainer').html(result);
 
-                    // Re-check already selected books
+                    // Check already selected books in modal
                     selectedBooks.forEach(function (book) {
                         $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
                     });
@@ -153,6 +135,7 @@
             });
         });
 
+        // Checkbox change in modal for selecting/deselecting books
         $('#booksListContainer').on('change', '.book-checkbox', function () {
             var bookId = parseInt($(this).data('book-id'));
             var isChecked = $(this).is(':checked');
@@ -166,9 +149,9 @@
                         PublisherName: $(this).data('publisher-name'),
                         CourseName: $(this).data('course-name'),
                         Quantity: 1,
-                        IsNew: true 
+                        IsNew: true,
+                        QuantityChanged: false
                     });
-
                 }
             } else {
                 selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
@@ -177,70 +160,71 @@
             renderSelectedBooksTable(selectedBooks);
         });
 
+        // Render the selected books table with quantity dropdown and remove button
         function renderSelectedBooksTable(books) {
             var tbody = $('#booksListBody');
             tbody.empty();
 
             books.forEach(function (book) {
-                var quantityDropdown = $('<select class="form-select form-select-sm quantity-dropdown" data-book-id="' + book.BookId + '">');
+                var quantityDropdown = $('<select>')
+                    .addClass('form-select form-select-sm quantity-dropdown')
+                    .attr('data-book-id', book.BookId);
+
                 for (let i = 1; i <= 10; i++) {
-                    quantityDropdown.append('<option value="' + i + '" ' + (i == book.Quantity ? 'selected' : '') + '>' + i + '</option>');
+                    quantityDropdown.append(
+                        $('<option>').val(i).text(i).prop('selected', i === book.Quantity)
+                    );
                 }
 
-                var row = $('<tr>');
+                var row = $('<tr>')
+                    .attr('data-book-id', book.BookId)
+                    .attr('data-book-issuedetail-id', book.BookIssueDetailId || 0);
+
                 row.append($('<td>').text(book.BookName));
                 row.append($('<td>').text(book.ISBN));
                 row.append($('<td>').text(book.PublisherName));
                 row.append($('<td>').text(book.CourseName));
                 row.append($('<td>').append(quantityDropdown));
                 row.append(
-                    $('<td>').html('<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>')
+                    $('<td>').html(
+                        '<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>'
+                    )
                 );
 
                 tbody.append(row);
             });
         }
 
-        $('#selectedBooksContainer').on('click', '.remove-book', function () {
-            var bookId = $(this).data('book-id');
-
-            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
-
-            renderSelectedBooksTable(selectedBooks);
-
-            $('.book-checkbox[data-book-id="' + bookId + '"]').prop('checked', false);
-        });
-
-        $('#selectedBooksContainer').on('change', '.quantity-dropdown', function () {
+        // Update quantity in selectedBooks when dropdown changes (event delegation)
+        $('#booksListBody').on('change', '.quantity-dropdown', function () {
             var bookId = parseInt($(this).data('book-id'));
             var newQuantity = parseInt($(this).val());
 
             var book = selectedBooks.find(b => b.BookId === bookId);
             if (book) {
-                if (book.Quantity !== newQuantity) {
-                    book.QuantityChanged = true;
-                } else {
-                    book.QuantityChanged = false;
-                }
+                book.QuantityChanged = (book.Quantity !== newQuantity);
                 book.Quantity = newQuantity;
             }
         });
 
+        // Remove book from selectedBooks and update UI
+        $('#booksListBody').on('click', '.remove-book', function () {
+            var bookId = parseInt($(this).data('book-id'));
 
+            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+
+            renderSelectedBooksTable(selectedBooks);
+
+            // Uncheck checkbox in modal if open
+            $('.book-checkbox[data-book-id="' + bookId + '"]').prop('checked', false);
+        });
+
+        // Submit form with selectedBooks and changedBooks
         $('#issueBookForm').submit(function (e) {
             e.preventDefault();
 
-            var selectedBookDetails = selectedBooks.map(function (book) {
-                return {
-                    BookId: book.BookId,
-                    BookIssueDetailId: book.BookIssueDetailId || 0,
-                    Quantity: book.Quantity,
-                    IsNew: book.IsNew || false,
-                    QuantityChanged: book.QuantityChanged || false
-                };
-            });
-            var changedBooks = selectedBookDetails.filter(b => b.QuantityChanged || b.IsNew);
-            console.log(changedBooks)
+            var changedBooks = selectedBooks.filter(b => b.QuantityChanged || b.IsNew);
+
             var model = {
                 BookIssueId: $('#BookIssueId').val(),
                 MemberId: $('#MemberId').val(),
@@ -249,7 +233,7 @@
                 DueDate: $('#DueDate').val(),
                 CreatedBy: 1,
                 ChangedBooks: changedBooks,
-                SelectedBooks: selectedBookDetails
+                SelectedBooks: selectedBooks
             };
 
             $.ajax({
@@ -258,7 +242,6 @@
                 contentType: 'application/json',
                 data: JSON.stringify(model),
                 success: function (response) {
-                    debugger;
                     if (response.success) {
                         alert(response.message);
                         window.location.href = '@Url.Action("IssueBookList", "Books")';
@@ -271,9 +254,5 @@
                 }
             });
         });
-
     });
 </script>
-
-
-

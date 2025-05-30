@@ -288,7 +288,7 @@ namespace WebApplication2.Controllers
                     {
                         BookIssueId = bookIssueDal.BookIssueId,
                         BookIssueDetailIds = updatedBooks.Select(b => b.BookIssueDetailId).ToList(),
-                        BookIds = updatedBooks.Select(b => b.BookId).ToList(),
+                        //BookIds = updatedBooks.Select(b => b.BookId).ToList(),
                         Quantities = updatedBooks.Select(b => b.Quantity).ToList(),
                         ModifiedBy = 1,
                         ModifiedOn = DateTime.Now

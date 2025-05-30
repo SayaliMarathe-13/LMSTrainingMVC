@@ -84,13 +84,13 @@ namespace DAL.Dal
 
         public bool Save()
         {
-            if (this.BookIssueDetailId == 0)
+            if (this.BookIssueDetailIds != null && this.BookIssueDetailIds.Count > 0)
             {
-                return Insert();
+                return this.Update();
             }
-            else if (this.BookIssueDetailId > 0)
+            else if (this.BookIssueDetailId == 0)
             {
-                return Update();
+                return this.Insert();
             }
             else
             {
