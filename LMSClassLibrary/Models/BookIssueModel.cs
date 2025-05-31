@@ -26,7 +26,7 @@ namespace DAL.Models
         public int CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public int? ModifiedBy { get; set; }
-        public DateTime? ModifiedOn { get; set; }
+        public DateTime ModifiedOn { get; set; }
         public int BookIssueDetailId { get; set; }
         public List<MembersModel> MembersList { get; set; }
         public List<BookIssueDetailsModel> SelectedBooks { get; set; }
@@ -36,7 +36,7 @@ namespace DAL.Models
         public int TotalRecords { get; set; }
         public List<BookIssueDetailsModel> IssuedBooks { get; set; }
 
-        public List<BookIssueDetailsModel> ChangedBooks { get; set; } 
+        //public List<BookIssueDetailsModel> ChangedBooks { get; set; } 
 
     }
 

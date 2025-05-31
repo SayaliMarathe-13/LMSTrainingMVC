@@ -227,83 +227,23 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
+
         public JsonResult IssueBooks(BookIssueModel model)
         {
             try
             {
-                BookIssue bookIssueDal = new BookIssue
-                {
-                    BookIssueId = model.BookIssueId,
-                    MemberId = model.MemberId,
-                    IssueDate = model.IssueDate.Value,
-                    DueDate = model.DueDate.Value,
-                    LibrarianId = model.LibrarianId,
-                    IsActive = true,
-                    CreatedBy = 1,
-                    CreatedOn = model.BookIssueId == 0 ? DateTime.Now : model.CreatedOn,
-                    ModifiedBy = model.BookIssueId > 0 ? 1 : (int?)null,
-                    ModifiedOn = model.BookIssueId > 0 ? DateTime.Now : (DateTime?)null
-                };
+                model.CreatedBy = model.BookIssueId == 0 ? 1 : model.CreatedBy;
+                model.ModifiedBy = model.BookIssueId > 0 ? 1 : (int?)null;
 
-                bool isBookIssueSaved = bookIssueDal.Save();
+                BookIssue dal = new BookIssue();
+                bool saved = dal.SaveOrUpdate(model);
 
-                if (!isBookIssueSaved)
-                {
+                if (!saved)
                     return Json(new { success = false, message = "Failed to save book issue." });
-                }
 
-                string message = model.BookIssueId == 0 ? "Book issue created successfully." : "Book issue updated successfully.";
-
-                // Save only new books in details
-                var newBooks = model.SelectedBooks.Where(b => b.IsNew).ToList();
-
-                if (newBooks.Count > 0)
-                {
-                    BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
-                    {
-                        BookIssueId = bookIssueDal.BookIssueId,
-                        BookIds = newBooks.Select(b => b.BookId).ToList(),
-                        Quantities = newBooks.Select(b => b.Quantity).ToList(),
-                        IsActive = true,
-                        CreatedBy = model.CreatedBy,
-                        CreatedOn = model.BookIssueDetailId == 0 ? DateTime.Now : model.CreatedOn,
-                        ModifiedBy = model.BookIssueDetailId > 0 ? 1 : (int?)null,
-                        ModifiedOn = model.BookIssueDetailId > 0 ? DateTime.Now : (DateTime?)null
-                    };
-
-                    bool detailsSaved = bookIssueDetailsDal.Save();
-
-                    if (!detailsSaved)
-                    {
-                        return Json(new { success = false, message = "Failed to issue new books." });
-                    }
-                  
-                }
-
-                // Update existing books quantities if changed
-                var updatedBooks = model.SelectedBooks
-                    .Where(b => b.QuantityChanged && !b.IsNew)
-                    .ToList();
-
-                if (updatedBooks.Count > 0)
-                {
-                    BookIssueDetails bookIssueDetailsDal = new BookIssueDetails
-                    {
-                        BookIssueId = bookIssueDal.BookIssueId,
-                        BookIssueDetailIds = updatedBooks.Select(b => b.BookIssueDetailId).ToList(),
-                        Quantities = updatedBooks.Select(b => b.Quantity).ToList(),
-                        ModifiedBy = 1,
-                        ModifiedOn = DateTime.Now
-                    };
-
-                    bool updated = bookIssueDetailsDal.Save();
-
-                    if (!updated)
-                    {
-                        return Json(new { success = false, message = "Failed to update book issue details." });
-                    }
-                    message = " Book issue details updated successfully.";
-                }
+                string message = model.BookIssueId == 0
+                    ? "Book issue created successfully."
+                    : "Book issue updated successfully.";
 
                 return Json(new { success = true, message });
             }
@@ -313,6 +253,7 @@ namespace WebApplication2.Controllers
                 return Json(new { success = false, message = "Error occurred while issuing books." });
             }
         }
+
 
 
         public ActionResult IssueBookList()

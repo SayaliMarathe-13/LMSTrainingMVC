@@ -88,194 +88,170 @@
         </div>
     }
 </div>
-
 <script>
-    $(document).ready(function () {
+$(document).ready(function () {
 
-        var selectedBooks = [];
+    var selectedBooks = [];
 
-        // Populate selectedBooks if editing
-        @if (Model.IssuedBooks != null && Model.IssuedBooks.Any())
-        {
-           <text>
-                selectedBooks = @Html.Raw(Json.Encode(Model.IssuedBooks.Select(b => new {
-                               b.BookId,
-                               b.BookIssueDetailId,
-                               b.BookName,
-                               b.ISBN,
-                               b.PublisherName,
-                               b.CourseName,
-                               Quantity = b.Quantity,
-                               IsNew = false,
-                               QuantityChanged = false
-                           })));
-                renderSelectedBooksTable(selectedBooks);
-           </text>
-        }
+    // Load existing issued books if any (from Model)
+    @if (Model.IssuedBooks != null && Model.IssuedBooks.Any())
+    {
+        <text>
+        selectedBooks = @Html.Raw(Json.Encode(Model.IssuedBooks.Select(b => new {
+            b.BookId,
+            b.BookIssueDetailId,
+            b.BookName,
+            b.ISBN,
+            b.PublisherName,
+            b.CourseName,
+            Quantity = b.Quantity
+        })));
+        renderSelectedBooksTable(selectedBooks);
+        </text>
+    }
 
-        // Open modal and load book list
-        $('#btnAddBook').click(function () {
-            $.ajax({
-                url: '/Books/GetBooksList',
-                type: 'POST',
-                data: { IsSelectionMode: true },
-                success: function (result) {
-                    $('#booksListContainer').html(result);
+    // Open modal & load books list
+    $('#btnAddBook').click(function () {
+        $.ajax({
+            url: '/Books/GetBooksList',
+            type: 'POST',
+            data: { IsSelectionMode: true },
+            success: function (result) {
+                $('#booksListContainer').html(result);
 
-                    // Check already selected books in modal
-                    selectedBooks.forEach(function (book) {
-                        $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
-                    });
-
-                    $('#bookSelectionModal').modal('show');
-                },
-                error: function () {
-                    alert('Failed to load books list.');
-                }
-            });
-        });
-
-        // Checkbox change in modal for selecting/deselecting books
-        $('#booksListContainer').on('change', '.book-checkbox', function () {
-            var bookId = parseInt($(this).data('book-id'));
-            var isChecked = $(this).is(':checked');
-
-            if (isChecked) {
-                if (!selectedBooks.some(b => b.BookId === bookId)) {
-                    selectedBooks.push({
-                        BookId: bookId,
-                        BookName: $(this).data('book-name'),
-                        ISBN: $(this).data('isbn'),
-                        PublisherName: $(this).data('publisher-name'),
-                        CourseName: $(this).data('course-name'),
-                        Quantity: 1,
-                        IsNew: true,
-                        QuantityChanged: false
-                    });
-                }
-            } else {
-                selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
-            }
-
-            renderSelectedBooksTable(selectedBooks);
-        });
-
-        // Render the selected books table with quantity dropdown and remove button
-        function renderSelectedBooksTable(books) {
-            var tbody = $('#booksListBody');
-            tbody.empty();
-
-            books.forEach(function (book) {
-                var quantityDropdown = $('<select>')
-                    .addClass('form-select form-select-sm quantity-dropdown')
-                    .attr('data-book-id', book.BookId);
-
-                for (let i = 1; i <= 10; i++) {
-                    quantityDropdown.append(
-                        $('<option>').val(i).text(i).prop('selected', i === book.Quantity)
-                    );
-                }
-
-                var row = $('<tr>')
-                    .attr('data-book-id', book.BookId)
-                    .attr('data-book-issuedetail-id', book.BookIssueDetailId || 0);
-
-                row.append($('<td>').text(book.BookName));
-                row.append($('<td>').text(book.ISBN));
-                row.append($('<td>').text(book.PublisherName));
-                row.append($('<td>').text(book.CourseName));
-                row.append($('<td>').append(quantityDropdown));
-                row.append(
-                    $('<td>').html(
-                        '<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>'
-                    )
-                );
-
-                tbody.append(row);
-            });
-        }
-
-        // Update quantity in selectedBooks when dropdown changes (event delegation)
-        $('#booksListBody').on('change', '.quantity-dropdown', function () {
-            var bookId = parseInt($(this).data('book-id'));
-            var newQuantity = parseInt($(this).val());
-
-            var book = selectedBooks.find(b => b.BookId === bookId);
-            if (book) {
-                book.QuantityChanged = (book.Quantity !== newQuantity);
-                book.Quantity = newQuantity;
-            }
-        });
-
-        // Remove book from UI and backend
-        $('#booksListBody').on('click', '.remove-book', function () {
-            var bookId = parseInt($(this).data('book-id'));
-
-            // Find the BookIssueDetailId associated with this book row
-            var bookIssueDetailId = $(this).closest('tr').data('book-issuedetail-id');
-            console.log(bookIssueDetailId)
-            if (bookIssueDetailId && bookIssueDetailId > 0) {
-                $.ajax({
-                    url: '/Books/DeleteBookIssueDetail',
-                    type: 'POST',
-                    data: { bookIssueDetailId: bookIssueDetailId },
-                    success: function (response) {
-                      
-                        if (response.success) {
-                   
-                            // Remove from UI and selectedBooks array
-                            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
-                            renderSelectedBooksTable(selectedBooks);
-                        } else {
-                            alert('Failed to remove book: ' + response.message);
-                        }
-                    },
-                    error: function () {
-                        alert('Error occurred while removing book.');
-                    }
+                // Mark checkboxes already selected
+                selectedBooks.forEach(function (book) {
+                    $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
                 });
-            } else {
-                // If new book (no DB ID yet), just remove locally
-                selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
-                renderSelectedBooksTable(selectedBooks);
+
+                $('#bookSelectionModal').modal('show');
+            },
+            error: function () {
+                alert('Failed to load books list.');
             }
-        });
-
-
-        // Submit form with selectedBooks and changedBooks
-        $('#issueBookForm').submit(function (e) {
-            e.preventDefault();
-
-            var changedBooks = selectedBooks.filter(b => b.QuantityChanged || b.IsNew);
-
-            var model = {
-                BookIssueId: $('#BookIssueId').val(),
-                MemberId: $('#MemberId').val(),
-                LibrarianId: $('#LibrarianId').val(),
-                IssueDate: $('#IssueDate').val(),
-                DueDate: $('#DueDate').val(),
-                CreatedBy: 1,
-                ChangedBooks: changedBooks,
-                SelectedBooks: selectedBooks
-            };
-
-            $.ajax({
-                url: '@Url.Action("IssueBooks", "Books")',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(model),
-                success: function (response) {
-                    if (response.success) {
-                        alert(response.message);
-                        window.location.href = '@Url.Action("IssueBookList", "Books")';
-                    } else {
-                        alert('Failed: ' + response.message);
-                    }
-                },
-                error: function () {
-                    alert('An unexpected error occurred while issuing books.');
-                }
-            });
         });
     });
+
+    // Checkbox checked/unchecked in modal
+    $('#booksListContainer').on('change', '.book-checkbox', function () {
+        var bookId = parseInt($(this).data('book-id'));
+        var isChecked = $(this).is(':checked');
+
+        if (isChecked) {
+            // Add if not already selected
+            if (!selectedBooks.some(b => b.BookId === bookId)) {
+                selectedBooks.push({
+                    BookId: bookId,
+                    BookIssueDetailId: 0,
+                    BookName: $(this).data('book-name'),
+                    ISBN: $(this).data('isbn'),
+                    PublisherName: $(this).data('publisher-name'),
+                    CourseName: $(this).data('course-name'),
+                    Quantity: 1
+                });
+            }
+        } else {
+            // Remove from selectedBooks
+            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+        }
+
+        renderSelectedBooksTable(selectedBooks);
+    });
+
+    // Render selected books table
+    function renderSelectedBooksTable(books) {
+        var tbody = $('#booksListBody');
+        tbody.empty();
+
+        books.forEach(function (book) {
+            var quantityDropdown = $('<select>')
+                .addClass('form-select form-select-sm quantity-dropdown')
+                .attr('data-book-id', book.BookId);
+
+            for (let i = 1; i <= 10; i++) {
+                quantityDropdown.append(
+                    $('<option>').val(i).text(i).prop('selected', i === book.Quantity)
+                );
+            }
+
+            var row = $('<tr>')
+                .attr('data-book-id', book.BookId)
+                .attr('data-book-issuedetail-id', book.BookIssueDetailId || 0);
+
+            row.append($('<td>').text(book.BookName));
+            row.append($('<td>').text(book.ISBN));
+            row.append($('<td>').text(book.PublisherName));
+            row.append($('<td>').text(book.CourseName));
+            row.append($('<td>').append(quantityDropdown));
+            row.append(
+                $('<td>').html(
+                    '<button type="button" class="btn btn-sm btn-danger remove-book" data-book-id="' + book.BookId + '">Remove</button>'
+                )
+            );
+
+            tbody.append(row);
+        });
+    }
+
+    // Quantity dropdown changed
+    $('#booksListBody').on('change', '.quantity-dropdown', function () {
+        var bookId = parseInt($(this).data('book-id'));
+        var newQuantity = parseInt($(this).val());
+
+        var book = selectedBooks.find(b => b.BookId === bookId);
+        if (book) {
+            book.Quantity = newQuantity;
+        }
+    });
+
+    // Remove book button clicked
+    $('#booksListBody').on('click', '.remove-book', function () {
+        var bookId = parseInt($(this).data('book-id'));
+
+        // Just remove the book from the selectedBooks array
+        selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+
+        // Re-render the table
+        renderSelectedBooksTable(selectedBooks);
+    });
+
+    // Submit form - send only required data
+    $('#issueBookForm').submit(function (e) {
+        e.preventDefault();
+
+        var model = {
+            BookIssueId: $('#BookIssueId').val(),
+            MemberId: $('#MemberId').val(),
+            LibrarianId: $('#LibrarianId').val(),
+            IssueDate: $('#IssueDate').val(),
+            DueDate: $('#DueDate').val(),
+            CreatedBy: 1,
+            SelectedBooks: selectedBooks.map(b => ({
+                BookIssueDetailId: b.BookIssueDetailId || 0,
+                BookId: b.BookId,
+                Quantity: b.Quantity
+            }))
+        };
+
+        $.ajax({
+            url: '@Url.Action("IssueBooks", "Books")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(model),
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    window.location.href = '@Url.Action("IssueBookList", "Books")';
+                } else {
+                    alert('Failed: ' + response.message);
+                }
+            },
+            error: function () {
+                alert('An unexpected error occurred while issuing books.');
+            }
+        });
+    });
+
+});
 </script>
+

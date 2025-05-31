@@ -21,8 +21,7 @@ namespace LMSClassLibrary.Models
         public int ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public int Quantity { get; set; }
-        public bool QuantityChanged { get; set; }
-        public bool IsNew { get; set; }
+      
 
     }
 }

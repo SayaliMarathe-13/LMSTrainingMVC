@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Data;
 using DAL.Models;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 
 namespace DAL.Dal
 {
@@ -76,22 +77,76 @@ namespace DAL.Dal
             return bookIssueList;
         }
 
-        public bool Save()
+        
+        public bool SaveOrUpdate(BookIssueModel model)
         {
-            if (this.BookIssueId == 0)
+            try
             {
-                return this.Insert();
+                DataTable dt = new DataTable();
+                dt.Columns.Add("BookIssueDetailId", typeof(int));
+                dt.Columns.Add("BookIssueId", typeof(int));
+                dt.Columns.Add("BookId", typeof(int));
+                dt.Columns.Add("Quantity", typeof(int));
+                dt.Columns.Add("CreatedBy", typeof(int));
+                dt.Columns.Add("ModifiedBy", typeof(int));
+
+                foreach (var book in model.SelectedBooks)
+                {
+                    
+                    int createdBy = book.BookIssueDetailId == 0 ? 1 : book.CreatedBy;
+                    object modifiedBy = book.BookIssueDetailId > 0 ? (object)1 : DBNull.Value;
+
+                    dt.Rows.Add(
+                        book.BookIssueDetailId,
+                        model.BookIssueId,
+                        book.BookId,
+                        book.Quantity,
+                        createdBy,
+                        modifiedBy
+                    );
+                }
+
+                DbCommand cmd = db.GetStoredProcCommand("BookIssueUpsert");
+
+                // BookIssueId input/output
+                SqlParameter bookIssueIdParam = new SqlParameter("@BookIssueId", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.InputOutput,
+                    Value = model.BookIssueId
+                };
+
+                cmd.Parameters.Add(bookIssueIdParam);
+
+                // Main BookIssue parameters
+                db.AddInParameter(cmd, "@MemberId", DbType.Int32, model.MemberId);
+                db.AddInParameter(cmd, "@IssueDate", DbType.Date, model.IssueDate);
+                db.AddInParameter(cmd, "@DueDate", DbType.Date, model.DueDate);
+                db.AddInParameter(cmd, "@LibrarianId", DbType.Int32, model.LibrarianId);
+                db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, model.CreatedBy);
+                db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, (object)model.ModifiedBy ?? DBNull.Value);
+
+                // Add BookIssueDetails TVP
+                SqlParameter tvpParam = new SqlParameter("@BookIssueDetails", SqlDbType.Structured)
+                {
+                    TypeName = "dbo.BookIssueDetailsMergeType",
+                    Value = dt
+                };
+                cmd.Parameters.Add(tvpParam);
+
+                int result = db.ExecuteNonQuery(cmd);
+
+                // Output BookIssueId
+                model.BookIssueId = Convert.ToInt32(bookIssueIdParam.Value);
+
+                return true;
             }
-            else if (this.BookIssueId > 0)
+            catch (Exception ex)
             {
-                return this.Update();
-            }
-            else
-            {
-                this.BookIssueId = 0;
-                return false;
+                handler.InsertErrorLog(ex);
+                throw new Exception("Error saving BookIssue and Details: " + ex.Message);
             }
         }
+
 
         public bool Load()
         {
@@ -131,70 +186,7 @@ namespace DAL.Dal
                 throw new Exception("Error loading book issue details: " + ex.Message);
             }
         }
-        public bool Insert()
-        {
-            try
-            {
-                DbCommand com = this.db.GetStoredProcCommand("BookIssueInsert");
-
-                // OUTPUT parameter
-                this.db.AddOutParameter(com, "BookIssueId", DbType.Int32, 1024);
-
-                this.db.AddInParameter(com, "MemberId", DbType.Int32, this.MemberId);
-                this.db.AddInParameter(com, "IssueDate", DbType.Date, this.IssueDate);
-                this.db.AddInParameter(com, "DueDate", DbType.Date, this.DueDate);
-
-                if (this.ReturnDate.HasValue)
-                    this.db.AddInParameter(com, "ReturnDate", DbType.Date, this.ReturnDate.Value);
-                else
-                    this.db.AddInParameter(com, "ReturnDate", DbType.Date, DBNull.Value);
-
-                this.db.AddInParameter(com, "LibrarianId", DbType.Int32, this.LibrarianId);
-                this.db.AddInParameter(com, "IsActive", DbType.Boolean, this.IsActive);
-                this.db.AddInParameter(com, "CreatedBy", DbType.Int32, this.CreatedBy);
-
-                this.db.ExecuteNonQuery(com);
-
-                this.BookIssueId = Convert.ToInt32(this.db.GetParameterValue(com, "BookIssueId"));
-            }
-            catch (Exception ex)
-            {
-                handler.InsertErrorLog(ex);
-                throw new Exception("Error inserting book issue: " + ex.Message);
-            }
-
-            return this.BookIssueId > 0;
-        }
-        private bool Update()
-        {
-            try
-            {
-                DbCommand com = this.db.GetStoredProcCommand("BookIssueUpdate");
-
-                this.db.AddInParameter(com, "BookIssueId", DbType.Int32, this.BookIssueId);
-                this.db.AddInParameter(com, "MemberId", DbType.Int32, this.MemberId);
-                this.db.AddInParameter(com, "IssueDate", DbType.Date, this.IssueDate);
-                this.db.AddInParameter(com, "DueDate", DbType.Date, this.DueDate);
-
-                if (this.ReturnDate.HasValue)
-                    this.db.AddInParameter(com, "ReturnDate", DbType.Date, this.ReturnDate.Value);
-                else
-                    this.db.AddInParameter(com, "ReturnDate", DbType.Date, DBNull.Value);
-
-                this.db.AddInParameter(com, "LibrarianId", DbType.Int32, this.LibrarianId);
-                this.db.AddInParameter(com, "ModifiedBy", DbType.Int32, this.ModifiedBy);
-                this.db.AddInParameter(com, "ModifiedOn", DbType.DateTime, this.ModifiedOn);
-
-                this.db.ExecuteNonQuery(com);
-            }
-            catch (Exception ex)
-            {
-                handler.InsertErrorLog(ex);
-                throw new Exception("Error updating BookIssue: " + ex.Message);
-            }
-
-            return true;
-        }
+       
 
 
     }
