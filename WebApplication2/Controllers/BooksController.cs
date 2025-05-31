@@ -337,6 +337,35 @@ namespace WebApplication2.Controllers
         }
 
 
+        [HttpPost]
+        public JsonResult DeleteBookIssueDetail(int bookIssueDetailId)
+        {
+            try
+            {
+                BookIssueDetails detail = new BookIssueDetails
+                {
+                    BookIssueDetailId = bookIssueDetailId,
+                    ModifiedBy = 1, 
+                    ModifiedOn = DateTime.Now
+                };
+
+                bool isDeleted = detail.Delete();
+
+                if (isDeleted)
+                {
+                    return Json(new { success = true, message = "Book issue detail deleted successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to delete the book issue detail." });
+                }
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+            }
+        }
 
     }
 }

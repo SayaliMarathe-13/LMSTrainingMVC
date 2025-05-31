@@ -5,7 +5,7 @@
     ViewBag.Title = isEdit ? "Edit Issue Book" : "Issue Book";
 }
 
-<h3 class="text-center text-primary fw-bold">Issue Book</h3>
+<h3 class="text-center text-primary fw-bold">@ViewBag.Title</h3>
 
 <div class="container mt-5 pt-5">
     @using (Html.BeginForm("", "", FormMethod.Post, new { @id = "issueBookForm" }))
@@ -82,7 +82,7 @@
 
         <div class="d-flex justify-content-center gap-3 mt-3">
             <button type="submit" class="btn btn-success px-4">
-                Save
+                @(isEdit ? "Update" : "Save")
             </button>
             <a href="@Url.Action("IssueBookList", "Books")" class="btn btn-secondary px-4">Cancel</a>
         </div>
@@ -207,17 +207,40 @@
             }
         });
 
-        // Remove book from selectedBooks and update UI
+        // Remove book from UI and backend
         $('#booksListBody').on('click', '.remove-book', function () {
             var bookId = parseInt($(this).data('book-id'));
 
-            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
-
-            renderSelectedBooksTable(selectedBooks);
-
-            // Uncheck checkbox in modal if open
-            $('.book-checkbox[data-book-id="' + bookId + '"]').prop('checked', false);
+            // Find the BookIssueDetailId associated with this book row
+            var bookIssueDetailId = $(this).closest('tr').data('book-issuedetail-id');
+            console.log(bookIssueDetailId)
+            if (bookIssueDetailId && bookIssueDetailId > 0) {
+                $.ajax({
+                    url: '/Books/DeleteBookIssueDetail',
+                    type: 'POST',
+                    data: { bookIssueDetailId: bookIssueDetailId },
+                    success: function (response) {
+                      
+                        if (response.success) {
+                   
+                            // Remove from UI and selectedBooks array
+                            selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+                            renderSelectedBooksTable(selectedBooks);
+                        } else {
+                            alert('Failed to remove book: ' + response.message);
+                        }
+                    },
+                    error: function () {
+                        alert('Error occurred while removing book.');
+                    }
+                });
+            } else {
+                // If new book (no DB ID yet), just remove locally
+                selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
+                renderSelectedBooksTable(selectedBooks);
+            }
         });
+
 
         // Submit form with selectedBooks and changedBooks
         $('#issueBookForm').submit(function (e) {

@@ -176,7 +176,26 @@ namespace DAL.Dal
                 throw new Exception("Error updating BookIssueDetails: " + ex.Message);
             }
         }
+        public bool Delete()
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("BookIssueDetailsDelete");
 
+                this.db.AddInParameter(com, "BookIssueDetailId", DbType.Int32, this.BookIssueDetailId);
+                this.db.AddInParameter(com, "ModifiedBy", DbType.Int32, this.ModifiedBy);
+                this.db.AddInParameter(com, "ModifiedOn", DbType.DateTime, this.ModifiedOn);
+
+                this.db.ExecuteNonQuery(com);
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                throw new Exception("Error Deleting book issue detail: " + ex.Message);
+            }
+
+            return true;
+        }
 
 
     }
