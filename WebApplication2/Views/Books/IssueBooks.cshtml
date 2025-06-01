@@ -87,6 +87,42 @@
             <a href="@Url.Action("IssueBookList", "Books")" class="btn btn-secondary px-4">Cancel</a>
         </div>
     }
+    <!-- Modal for quantity error -->
+    <div class="modal fade" id="quantityErrorModal" tabindex="-1" aria-labelledby="quantityErrorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="quantityErrorModalLabel">Invalid Quantity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="quantityErrorMessage">
+                    <!-- Message gets injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteConfirmLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to remove this book from the list?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 <script>
 $(document).ready(function () {
@@ -166,7 +202,9 @@ $(document).ready(function () {
         books.forEach(function (book) {
             var quantityDropdown = $('<select>')
                 .addClass('form-select form-select-sm quantity-dropdown')
-                .attr('data-book-id', book.BookId);
+                .attr('data-book-id', book.BookId)
+                .attr('data-prev-value', book.Quantity)
+
 
             for (let i = 1; i <= 10; i++) {
                 quantityDropdown.append(
@@ -194,26 +232,66 @@ $(document).ready(function () {
     }
 
     // Quantity dropdown changed
+    // Handle quantity change and show modal if quantity exceeds available copies
     $('#booksListBody').on('change', '.quantity-dropdown', function () {
-        var bookId = parseInt($(this).data('book-id'));
-        var newQuantity = parseInt($(this).val());
+        var quantityInput = $(this);
+        var bookId = parseInt(quantityInput.data("book-id"));
+        var enteredQuantity = parseInt(quantityInput.val());
+
+        if (isNaN(enteredQuantity) || enteredQuantity <= 0) return;
 
         var book = selectedBooks.find(b => b.BookId === bookId);
-        if (book) {
-            book.Quantity = newQuantity;
+        if (!book) return;
+
+        // Ajax to get available copies
+        $.ajax({
+            url: '/Books/GetAvailableCopies',
+            data: { bookId: bookId },
+            success: function (res) {
+                if (res.success) {
+                    if (enteredQuantity > res.availableCopies) {
+                        // Set error message in modal
+                        $('#quantityErrorMessage').text(`Only ${res.availableCopies} copies are available.`);
+
+                        // Show modal (Bootstrap 5.2.3 way)
+                        var modal = new bootstrap.Modal(document.getElementById('quantityErrorModal'));
+                        modal.show();
+
+                        // Revert back to last valid quantity (stored in data-prev-value)
+                        quantityInput.val(quantityInput.attr('data-prev-value'));
+                    } else {
+                        // Update quantity and save as previous
+                        book.Quantity = enteredQuantity;
+                        quantityInput.attr('data-prev-value', enteredQuantity);
+                    }
+                }
+            }
+        });
+    });
+
+    let bookIdToDelete = null;
+
+    // When delete button is clicked
+    $('#booksListBody').on('click', '.remove-book', function () {
+        bookIdToDelete = parseInt($(this).data('book-id'));
+        $('#deleteConfirmModal').modal('show'); // Show Bootstrap modal
+    });
+
+    // When confirm delete is clicked
+    $('#confirmDeleteBtn').on('click', function () {
+        if (bookIdToDelete !== null) {
+            // Remove the book
+            selectedBooks = selectedBooks.filter(b => b.BookId !== bookIdToDelete);
+
+            // Re-render the table
+            renderSelectedBooksTable(selectedBooks);
+
+            // Reset and hide modal
+            bookIdToDelete = null;
+            $('#deleteConfirmModal').modal('hide');
         }
     });
 
-    // Remove book button clicked
-    $('#booksListBody').on('click', '.remove-book', function () {
-        var bookId = parseInt($(this).data('book-id'));
-
-        // Just remove the book from the selectedBooks array
-        selectedBooks = selectedBooks.filter(b => b.BookId !== bookId);
-
-        // Re-render the table
-        renderSelectedBooksTable(selectedBooks);
-    });
 
     // Submit form - send only required data
     $('#issueBookForm').submit(function (e) {
@@ -251,31 +329,7 @@ $(document).ready(function () {
             }
         });
     });
-    $(document).on('change', '.book-quantity', function () {
-        let quantityInput = $(this);
-        let bookId = quantityInput.data("book-id");
-        let enteredQuantity = parseInt(quantityInput.val());
-
-        // Validate inputs
-        if (!bookId || isNaN(enteredQuantity) || enteredQuantity <= 0) return;
-
-        $.ajax({
-            url: '/BookIssue/GetAvailableCopies',
-            data: { bookId: bookId },
-            success: function (res) {
-                if (res.success) {
-                    if (enteredQuantity > res.availableCopies) {
-                        quantityInput.next(".error-message").text(
-                            `Only ${res.availableCopies} copies are available.`
-                        );
-                        quantityInput.val('');
-                    } else {
-                        quantityInput.next(".error-message").text('');
-                    }
-                }
-            }
-        });
-    });
+   
 
 });
 </script>

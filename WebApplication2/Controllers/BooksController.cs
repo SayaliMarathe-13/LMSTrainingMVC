@@ -227,11 +227,15 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
-
-        public JsonResult IssueBooks(BookIssueModel model)
+        public ActionResult IssueBooks(BookIssueModel model)
         {
             try
             {
+                if (model.SelectedBooks == null || !model.SelectedBooks.Any())
+                {
+                    return Json(new { success = false, message = "Please select at least one book." });
+                }
+
                 model.CreatedBy = model.BookIssueId == 0 ? 1 : model.CreatedBy;
                 model.ModifiedBy = model.BookIssueId > 0 ? 1 : (int?)null;
 
