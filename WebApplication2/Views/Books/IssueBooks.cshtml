@@ -251,6 +251,31 @@ $(document).ready(function () {
             }
         });
     });
+    $(document).on('change', '.book-quantity', function () {
+        let quantityInput = $(this);
+        let bookId = quantityInput.data("book-id");
+        let enteredQuantity = parseInt(quantityInput.val());
+
+        // Validate inputs
+        if (!bookId || isNaN(enteredQuantity) || enteredQuantity <= 0) return;
+
+        $.ajax({
+            url: '/BookIssue/GetAvailableCopies',
+            data: { bookId: bookId },
+            success: function (res) {
+                if (res.success) {
+                    if (enteredQuantity > res.availableCopies) {
+                        quantityInput.next(".error-message").text(
+                            `Only ${res.availableCopies} copies are available.`
+                        );
+                        quantityInput.val('');
+                    } else {
+                        quantityInput.next(".error-message").text('');
+                    }
+                }
+            }
+        });
+    });
 
 });
 </script>

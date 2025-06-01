@@ -254,8 +254,6 @@ namespace WebApplication2.Controllers
             }
         }
 
-
-
         public ActionResult IssueBookList()
         {
             try
@@ -276,5 +274,22 @@ namespace WebApplication2.Controllers
                 return View("Error");
             }
         }
+        [HttpGet]
+        public JsonResult GetAvailableCopies(int bookId)
+        {
+            try
+            {
+                Books dal = new Books(); 
+                int availableCopies = dal.GetTotalCopiesByBookId(bookId);
+
+                return Json(new { success = true, availableCopies = availableCopies }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                return Json(new { success = false, message = "Error fetching available copies." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
     }
 }

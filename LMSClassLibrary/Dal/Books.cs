@@ -277,8 +277,32 @@ namespace DAL.Dal
 
             return true;
         }
+        public int GetTotalCopiesByBookId(int bookId)
+        {
+            try
+            {
+                Database db = DatabaseFactory.CreateDatabase();
+                DbCommand cmd = db.GetStoredProcCommand("BooksGetDetails");
+                db.AddInParameter(cmd, "@BookId", DbType.Int32, bookId);
 
-       
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    if (reader.Read())
+                    {
+                        return reader["TotalCopies"] != DBNull.Value ? Convert.ToInt32(reader["TotalCopies"]) : 0;
+                    }
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                throw new Exception("Error retrieving total copies: " + ex.Message);
+            }
+        }
+
+
     }
 }
 
