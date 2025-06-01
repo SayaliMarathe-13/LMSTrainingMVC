@@ -54,7 +54,7 @@ namespace DAL.Models
         public string SortColumn { get; set; } 
         public string SortDirection { get; set; }
         public bool IsSelectionMode { get; set; }
-     
+
 
     }
 }

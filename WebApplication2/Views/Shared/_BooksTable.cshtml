@@ -6,6 +6,7 @@
     int endRecord = startRecord + Model.BooksList.Count() - 1;
     string currentSortColumn = Model.SortColumn;
     string currentSortDirection = Model.SortDirection;
+    var isSelectionMode = ViewBag.IsSelectionMode as bool? ?? false;
 }
 
 
@@ -107,37 +108,37 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        @if (Model.IsSelectionMode)
-                        {
+                        @if (isSelectionMode)
+                        { 
                             <input type="checkbox" class="book-checkbox"
                                    data-book-id="@book.BookId"
                                    data-book-name="@book.BookName"
                                    data-isbn="@book.ISBN"
                                    data-publisher-name="@book.PublisherName"
                                    data-course-name="@book.CourseName" />
-                           
+
                         }
 
                         else
                         {
-                            <div class="d-inline-flex">
-                                <button type="button"
-                                        class="btn btn-outline-primary btn-sm me-2 open-book-form"
-                                        data-id="@book.BookId"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#addBookModal"
-                                        title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
+                        <div class="d-inline-flex">
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm me-2 open-book-form"
+                                    data-id="@book.BookId"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#addBookModal"
+                                    title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
 
-                                <button type="button"
-                                        class="btn btn-outline-danger btn-sm delete-book"
-                                        data-id="@book.BookId"
-                                        data-name="@book.BookName"
-                                        title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm delete-book"
+                                    data-id="@book.BookId"
+                                    data-name="@book.BookName"
+                                    title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                         }
                     </td>
 
@@ -201,7 +202,7 @@
 <style>
     .sort {
         cursor: pointer;
-        color: inherit; 
+        color: inherit;
         text-decoration: none;
     }
 </style>

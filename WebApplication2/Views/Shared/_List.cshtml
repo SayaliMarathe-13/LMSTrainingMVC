@@ -11,7 +11,7 @@
     </div>*@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0">Books List</h3>
-    <button class="btn btn-success open-book-form" id="btnAddBook" data-bs-toggle="modal" data-bs-target="#addBookModal">
+    <button class="btn btn-success open-book-form" id="btnAddBook" data-bs-toggle="modal" data-bs-target="#addBookModal" >
         <i class="bi bi-plus-lg"></i> Add Book
     </button>
 </div>
@@ -165,7 +165,6 @@
                var form = $('#searchForm');
                var url = '@Url.Action("GetBooksList", "Books")';
                var formData = form.serialize();
-               formData += '&IsSelectionMode=' + isSelectionMode;
                console.log(formData);
                //debugger;
                $('#loader').show();
@@ -253,10 +252,10 @@
                         $('#SortDirection').val(newDirection);
                     } else {
                         $('#SortColumn').val(column);
-                        $('#SortDirection').val("ASC");
+                        $('#SortDirection').val("ASC"); 
                     }
 
-                    $('#PageNumber').val(1);
+                    $('#PageNumber').val(1); 
                     loadBooks();
                 });
 
@@ -342,46 +341,44 @@
                }
            });*@
 
+           $('.selectpicker').on('changed.bs.select', function () {
+               loadBooks();
+           });
 
-            var isSelectionMode = @((ViewBag.IsSelectionMode != null && (bool)ViewBag.IsSelectionMode) ? "true" : "false");
-    $('.selectpicker').on('changed.bs.select', function () {
-    loadBooks();
-    });
+           $('.filter-dropdown').change(function () {
+            //$('#PageNumber').val(1);
+            loadBooks();
+          });
 
-    $('.filter-dropdown').change(function () {
-    //$('#PageNumber').val(1);
-    loadBooks();
-    });
+        $('#searchButton').click(function () {
+            loadBooks();
+        });
 
-    $('#searchButton').click(function () {
-    loadBooks();
-    });
+        $('#resetButton').click(function () {
+            $('#BookName').val("");
+            $('#PublisherId').val("");
+            $('#SupplierId').val("");
+            $('#PublisherIdsDropdown').selectpicker('deselectAll');
+            $('#SupplierIdsDropdown').selectpicker('deselectAll');
+            $('#CourseIdsDropdown').selectpicker('deselectAll');
+            $('#PageNumber').val(1);
+            $('#PageSize').val(10);
+            loadBooks();
+        });
 
-    $('#resetButton').click(function () {
-    $('#BookName').val("");
-    $('#PublisherId').val("");
-    $('#SupplierId').val("");
-    $('#PublisherIdsDropdown').selectpicker('deselectAll');
-    $('#SupplierIdsDropdown').selectpicker('deselectAll');
-    $('#CourseIdsDropdown').selectpicker('deselectAll');
-    $('#PageNumber').val(1);
-    $('#PageSize').val(10);
-    loadBooks();
-    });
+        $(document).on('change', '#PageSizeSelector', function () {
+            var selectedSize = $(this).val();
+            $('#PageSize').val(selectedSize);
+            $('#PageNumber').val(1);
+            loadBooks();
+        });
 
-    $(document).on('change', '#PageSizeSelector', function () {
-    var selectedSize = $(this).val();
-    $('#PageSize').val(selectedSize);
-    $('#PageNumber').val(1);
-    loadBooks();
-    });
-
-    $(document).on('click', '.pagination-button', function () {
-    var page = $(this).data('page');
-    $('#PageNumber').val(page);
-    loadBooks();
-    });
-});
+        $(document).on('click', '.pagination-button', function () {
+            var page = $(this).data('page');
+            $('#PageNumber').val(page);
+            loadBooks();
+        });
+       });
 
     </script>
 }
@@ -495,4 +492,5 @@
         border: 1px solid #ced4da;
         background-color: #fff;
     }
+
 </style>
