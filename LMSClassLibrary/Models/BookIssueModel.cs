@@ -36,8 +36,6 @@ namespace DAL.Models
         public int TotalRecords { get; set; }
         public List<BookIssueDetailsModel> IssuedBooks { get; set; }
 
-        //public List<BookIssueDetailsModel> ChangedBooks { get; set; } 
-
     }
 
 }

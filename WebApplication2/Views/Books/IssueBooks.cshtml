@@ -125,8 +125,15 @@
 
 </div>
 <script>
-$(document).ready(function () {
-
+    $(document).ready(function () {
+        $('.btn-close[data-bs-dismiss="modal"]').on('click', function () {
+            $.post('/Books/SetSelectionMode', { isSelectionMode: false });
+        });
+        
+            if (!$('#bookSelectionModal').hasClass('show')) {
+                $.post('/Books/SetSelectionMode', { isSelectionMode: false });
+            }
+     
     var selectedBooks = [];
 
     // Load existing issued books if any (from Model)
@@ -145,29 +152,23 @@ $(document).ready(function () {
         renderSelectedBooksTable(selectedBooks);
         </text>
     }
-
-    // Open modal & load books list
+   
     $('#btnAddBook').click(function () {
-        $.ajax({
-            url: '/Books/List',
-            type: 'POST',
-            data: { IsSelectionMode: true },
-            success: function (result) {
-                $('#booksListContainer').html(result);
-
-                // Mark checkboxes already selected
-                selectedBooks.forEach(function (book) {
-                    $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
-                });
-
-                $('#bookSelectionModal').modal('show');
-            },
-            error: function () {
-                alert('Failed to load books list.');
-            }
+        $.post('/Books/SetSelectionMode', { isSelectionMode: true }, function () {
+            $.ajax({
+                url: '/Books/List',
+                type: 'GET',
+                success: function (result) {
+                    $('#booksListContainer').html(result);
+                    selectedBooks.forEach(function (book) {
+                        $('.book-checkbox[data-book-id="' + book.BookId + '"]').prop('checked', true);
+                    });
+                    $('#bookSelectionModal').modal('show');
+                }
+            });
         });
     });
-
+   
     // Checkbox checked/unchecked in modal
     $('#booksListContainer').on('change', '.book-checkbox', function () {
         var bookId = parseInt($(this).data('book-id'));

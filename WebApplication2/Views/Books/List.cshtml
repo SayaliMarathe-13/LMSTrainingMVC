@@ -9,146 +9,149 @@
                 <i class="bi bi-plus-lg"></i> Add Book
             </a>
     </div>*@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">Books List</h3>
-    <button class="btn btn-success open-book-form" id="btnAddBook" data-bs-toggle="modal" data-bs-target="#addBookModal">
-        <i class="bi bi-plus-lg"></i> Add Book
-    </button>
-</div>
-@*modal for add and edit*@
-<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="addBookFormContainer">
+@if (!Model.IsSelectionMode)
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Books List</h3>
+        <button class="btn btn-success open-book-form" id="btnAddBook" data-bs-toggle="modal" data-bs-target="#addBookModal">
+            <i class="bi bi-plus-lg"></i> Add Book
+        </button>
+    </div>
+}
+    @*modal for add and edit*@
+    <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="addBookFormContainer">
 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<div class="mb-3 p-3 bg-light border rounded">
-    <form id="searchForm" class="form-inline d-flex flex-wrap justify-content-between align-items-center">
-        <div class="d-flex flex-wrap gap-3 align-items-center">
+    <div class="mb-3 p-3 bg-light border rounded">
+        <form id="searchForm" class="form-inline d-flex flex-wrap justify-content-between align-items-center">
+            <div class="d-flex flex-wrap gap-3 align-items-center">
 
-            @Html.TextBoxFor(m => m.BookName, new { @class = "form-control", placeholder = "Search Books...", style = "width: 300px;", id = "BookName" })
+                @Html.TextBoxFor(m => m.BookName, new { @class = "form-control", placeholder = "Search Books...", style = "width: 300px;", id = "BookName" })
 
-            <!-- Publisher Multi-select -->
-            <select id="PublisherIdsDropdown" name="PublisherIds" multiple
-                    class="selectpicker form-control filter-dropdown"
-                    data-live-search="true"
-                    data-actions-box="true"
-                    title="Select publishers"
-                    style="width: 200px;">
-                @foreach (var publisher in Model.PublishersList)
-                {
-                    <option value="@publisher.PublisherId" @(Model.PublisherIds != null && Model.PublisherIds.Contains(publisher.PublisherId) ? "selected" : "")>
-                        @publisher.PublisherName
-                    </option>
-                }
-            </select>
+                <!-- Publisher Multi-select -->
+                <select id="PublisherIdsDropdown" name="PublisherIds" multiple
+                        class="selectpicker form-control filter-dropdown"
+                        data-live-search="true"
+                        data-actions-box="true"
+                        title="Select publishers"
+                        style="width: 200px;">
+                    @foreach (var publisher in Model.PublishersList)
+                    {
+                        <option value="@publisher.PublisherId" @(Model.PublisherIds != null && Model.PublisherIds.Contains(publisher.PublisherId) ? "selected" : "")>
+                            @publisher.PublisherName
+                        </option>
+                    }
+                </select>
 
-            <!-- Supplier Multi-select -->
-            <select id="SupplierIdsDropdown" name="SupplierIds" multiple
-                    class="selectpicker form-control filter-dropdown"
-                    data-live-search="true"
-                    data-actions-box="true"
-                    title="Select suppliers"
-                    style="width: 200px;">
-                @foreach (var supplier in Model.SuppliersList)
-                {
-                    <option value="@supplier.SupplierId" @(Model.SupplierIds != null && Model.SupplierIds.Contains(supplier.SupplierId) ? "selected" : "")>
-                        @supplier.SupplierName
-                    </option>
-                }
-            </select>
+                <!-- Supplier Multi-select -->
+                <select id="SupplierIdsDropdown" name="SupplierIds" multiple
+                        class="selectpicker form-control filter-dropdown"
+                        data-live-search="true"
+                        data-actions-box="true"
+                        title="Select suppliers"
+                        style="width: 200px;">
+                    @foreach (var supplier in Model.SuppliersList)
+                    {
+                        <option value="@supplier.SupplierId" @(Model.SupplierIds != null && Model.SupplierIds.Contains(supplier.SupplierId) ? "selected" : "")>
+                            @supplier.SupplierName
+                        </option>
+                    }
+                </select>
 
-            <!-- Your existing multi-select courses -->
-            <select id="CourseIdsDropdown" name="CourseIds" multiple
-                    class="selectpicker form-control"
-                    data-live-search="true"
-                    data-actions-box="true"
-                    title="Select courses">
-                @foreach (var course in Model.CoursesList)
-                {
-                    <option value="@course.CourseId" @(Model.CourseIds != null && Model.CourseIds.Contains(course.CourseId) ? "selected" : "")>
-                        @course.CourseName
-                    </option>
-                }
-            </select>
-
-
-
-            @Html.HiddenFor(m => m.PageNumber, new { @class = "form-control", placeholder = "Page No.", style = "width: 100px;", min = "1", id = "PageNumber" })
-
-            @Html.HiddenFor(m => m.PageSize, new { @class = "form-control", placeholder = "Page Size", style = "width: 100px;", min = "1", id = "PageSize" })
-            @Html.HiddenFor(m => m.SortColumn, new { id = "SortColumn" })
-            @Html.HiddenFor(m => m.SortDirection, new { id = "SortDirection" })
+                <!-- Your existing multi-select courses -->
+                <select id="CourseIdsDropdown" name="CourseIds" multiple
+                        class="selectpicker form-control"
+                        data-live-search="true"
+                        data-actions-box="true"
+                        title="Select courses">
+                    @foreach (var course in Model.CoursesList)
+                    {
+                        <option value="@course.CourseId" @(Model.CourseIds != null && Model.CourseIds.Contains(course.CourseId) ? "selected" : "")>
+                            @course.CourseName
+                        </option>
+                    }
+                </select>
 
 
-            <button type="button" class="btn btn-primary" id="searchButton">Search</button>
-            <button type="button" class="btn btn-secondary" id="resetButton">Reset</button>
-        </div>
-    </form>
-</div>
 
-<div id="booksTableContainer">
+                @Html.HiddenFor(m => m.PageNumber, new { @class = "form-control", placeholder = "Page No.", style = "width: 100px;", min = "1", id = "PageNumber" })
 
-</div>
+                @Html.HiddenFor(m => m.PageSize, new { @class = "form-control", placeholder = "Page Size", style = "width: 100px;", min = "1", id = "PageSize" })
+                @Html.HiddenFor(m => m.SortColumn, new { id = "SortColumn" })
+                @Html.HiddenFor(m => m.SortDirection, new { id = "SortDirection" })
 
-<div id="loader" style="display: none; text-align: center; margin-top: 100px;">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-</div>
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-    <div id="deleteSuccessToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body" id="toastMessage">
+
+                <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+                <button type="button" class="btn btn-secondary" id="resetButton">Reset</button>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </form>
+    </div>
+
+    <div id="booksTableContainer">
+
+    </div>
+
+    <div id="loader" style="display: none; text-align: center; margin-top: 100px;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-</div>
-
-<div class="modal fade" id="deleteConfirmBox" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Deletion
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-0 fs-5">
-                    Are you sure you want to delete the book:
-                    <strong class="text-danger" id="BookName"></strong>?
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
-                    <i class="bi bi-trash me-1"></i>Yes, Delete
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Cancel
-                </button>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+        <div id="deleteSuccessToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>*@
-    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+    <div class="modal fade" id="deleteConfirmBox" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0 fs-5">
+                        Are you sure you want to delete the book:
+                        <strong class="text-danger" id="BookName"></strong>?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Yes, Delete
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
+    @section Scripts {
+        @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>*@
+        <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+
+        <script>
        $(document).ready(function () {
            loadBooks();
 
@@ -165,7 +168,6 @@
                var form = $('#searchForm');
                var url = '@Url.Action("GetBooksList", "Books")';
                var formData = form.serialize();
-               formData += '&IsSelectionMode=' + isSelectionMode;
                console.log(formData);
                //debugger;
                $('#loader').show();
@@ -383,116 +385,116 @@
     });
 });
 
-    </script>
-}
+        </script>
+    }
 
-@*@section Scripts {
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script>
+    @*@section Scripts {
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <script>
 
-            $(document).ready(function () {
-                restoreSearchParams();
-                loadBooks();
+                $(document).ready(function () {
+                    restoreSearchParams();
+                    loadBooks();
 
-                function loadBooks() {
-                    var form = $('#searchForm');
-                    var url = '@Url.Action("GetBooksList", "Books")';
-                    var formData = form.serialize();
+                    function loadBooks() {
+                        var form = $('#searchForm');
+                        var url = '@Url.Action("GetBooksList", "Books")';
+                        var formData = form.serialize();
 
-                    $('#loader').show();
-                    $('#booksTableContainer').hide();
+                        $('#loader').show();
+                        $('#booksTableContainer').hide();
 
-                    $.ajax({
-                        type: "GET",
-                        url: url,
-                        data: formData,
-                        async: true,
-                        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-                        dataType: "html",
-                        success: function (partialView) {
-                            $('#booksTableContainer').html(partialView).show();
-                            $('#loader').hide();
+                        $.ajax({
+                            type: "GET",
+                            url: url,
+                            data: formData,
+                            async: true,
+                            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                            dataType: "html",
+                            success: function (partialView) {
+                                $('#booksTableContainer').html(partialView).show();
+                                $('#loader').hide();
 
-                            setCookie("searchFormData", formData);
-                        },
-                        error: function (jqXHR, textStatus, errorThrown) {
-                            alert('Error: ' + textStatus);
-                        }
-                    });
-                }
-
-                function setCookie(name, value) {
-                    var date = new Date();
-                    date.setDate(date.getDate() + 1);
-                    var expires = "expires=" + date.toUTCString();
-                    document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
-                }
-
-                function deleteCookie(name) {
-                    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                }
-
-                function restoreSearchParams() {
-                    var cookieData = getCookie("searchFormData");
-                    if (cookieData) {
-                        var params = new URLSearchParams(cookieData);
-                        $('#searchForm input, #searchForm select').each(function () {
-                            var name = this.name;
-                            if (params.has(name)) {
-                                $(this).val(params.get(name));
+                                setCookie("searchFormData", formData);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                alert('Error: ' + textStatus);
                             }
                         });
                     }
-                }
 
-                function getCookie(name) {
-                    var cookieName = name + "=";
-                    var cookies = document.cookie.split(';');
-                    for (var i = 0; i < cookies.length; i++) {
-                        var c = cookies[i].trim();
-                        if (c.indexOf(cookieName) === 0) {
-                            return decodeURIComponent(c.substring(cookieName.length, c.length));
+                    function setCookie(name, value) {
+                        var date = new Date();
+                        date.setDate(date.getDate() + 1);
+                        var expires = "expires=" + date.toUTCString();
+                        document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
+                    }
+
+                    function deleteCookie(name) {
+                        document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    }
+
+                    function restoreSearchParams() {
+                        var cookieData = getCookie("searchFormData");
+                        if (cookieData) {
+                            var params = new URLSearchParams(cookieData);
+                            $('#searchForm input, #searchForm select').each(function () {
+                                var name = this.name;
+                                if (params.has(name)) {
+                                    $(this).val(params.get(name));
+                                }
+                            });
                         }
                     }
-                    return "";
-                }
 
-                $('#resetButton').click(function () {
-                    $('#searchForm')[0].reset();
-                    deleteCookie("searchFormData");  // Delete the saved cookie data
-                    loadBooks();
-                });
+                    function getCookie(name) {
+                        var cookieName = name + "=";
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var c = cookies[i].trim();
+                            if (c.indexOf(cookieName) === 0) {
+                                return decodeURIComponent(c.substring(cookieName.length, c.length));
+                            }
+                        }
+                        return "";
+                    }
 
-                $('.filter-dropdown').change(function () {
-                    loadBooks();
-                });
+                    $('#resetButton').click(function () {
+                        $('#searchForm')[0].reset();
+                        deleteCookie("searchFormData");  // Delete the saved cookie data
+                        loadBooks();
+                    });
 
-                $('#searchButton').click(function () {
-                    loadBooks();
-                });
+                    $('.filter-dropdown').change(function () {
+                        loadBooks();
+                    });
 
-                $(document).on('change', '#PageSizeSelector', function () {
-                    var selectedSize = $(this).val();
-                    $('#PageSize').val(selectedSize);
-                    $('#PageNumber').val(1);
-                    loadBooks();
-                });
+                    $('#searchButton').click(function () {
+                        loadBooks();
+                    });
 
-                $(document).on('click', '.pagination-button', function () {
-                    var page = $(this).data('page');
-                    $('#PageNumber').val(page);
-                    loadBooks();
+                    $(document).on('change', '#PageSizeSelector', function () {
+                        var selectedSize = $(this).val();
+                        $('#PageSize').val(selectedSize);
+                        $('#PageNumber').val(1);
+                        loadBooks();
+                    });
+
+                    $(document).on('click', '.pagination-button', function () {
+                        var page = $(this).data('page');
+                        $('#PageNumber').val(page);
+                        loadBooks();
+                    });
                 });
-            });
-        </script>
-    }*@
-<style>
-    .bootstrap-select .dropdown-toggle {
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        line-height: 1.5;
-        border-radius: 0.375rem;
-        border: 1px solid #ced4da;
-        background-color: #fff;
-    }
-</style>
+            </script>
+        }*@
+    <style>
+        .bootstrap-select .dropdown-toggle {
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            background-color: #fff;
+        }
+    </style>

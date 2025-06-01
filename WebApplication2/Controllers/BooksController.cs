@@ -17,21 +17,17 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                bool isSelectionMode = false;
-                var isSelectionModeValue = Request.Form["IsSelectionMode"];
-                if (!string.IsNullOrEmpty(isSelectionModeValue))
-                    bool.TryParse(isSelectionModeValue, out isSelectionMode);
-
-                TempData["IsSelectionMode"] = isSelectionMode;
+                
                 //throw new Exception("manual test exception for logging");
                 BooksModel model = Session["SearchFormData"] as BooksModel ?? new BooksModel();
                 Publishers publishersDal = new Publishers();
                 Suppliers suppliersDal = new Suppliers();
                 Courses coursesDal = new Courses();
+                model.IsSelectionMode = Session["IsSelectionMode"] as bool? ?? false;
                 model.PublishersList = publishersDal.GetAllPublisherNames();
                 model.SuppliersList = suppliersDal.GetAllSupplierNames();
                 model.CoursesList = coursesDal.GetAllCourseNames();
-          
+
                 return View(model);
             }
             catch (Exception ex)
@@ -47,13 +43,11 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                var isSelectionMode = TempData["IsSelectionMode"] as bool? ?? false;
-
+                model.IsSelectionMode = Session["IsSelectionMode"] as bool? ?? false;
 
                 Session["SearchFormData"] = model;
                 Books booksDal = new Books();
                 model.BooksList = booksDal.GetSearchedBooksList(model);
-                ViewBag.IsSelectionMode = isSelectionMode; // pass to partial view via ViewBag
 
                 return PartialView("_BooksTable", model);
             }
@@ -304,6 +298,12 @@ namespace WebApplication2.Controllers
                 handler.InsertErrorLog(ex);
                 return Json(new { success = false, message = "Error fetching available copies." }, JsonRequestBehavior.AllowGet);
             }
+        }
+        [HttpPost]
+        public ActionResult SetSelectionMode(bool isSelectionMode)
+        {
+            Session["IsSelectionMode"] = isSelectionMode;
+            return Json(new { success = true });
         }
 
     }

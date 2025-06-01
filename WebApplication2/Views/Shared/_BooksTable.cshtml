@@ -6,7 +6,7 @@
     int endRecord = startRecord + Model.BooksList.Count() - 1;
     string currentSortColumn = Model.SortColumn;
     string currentSortDirection = Model.SortDirection;
-    var isSelectionMode = ViewBag.IsSelectionMode as bool? ?? false;
+    
 }
 
 
@@ -108,7 +108,7 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        @if (isSelectionMode)
+                        @if (Model.IsSelectionMode)
                         { 
                             <input type="checkbox" class="book-checkbox"
                                    data-book-id="@book.BookId"
