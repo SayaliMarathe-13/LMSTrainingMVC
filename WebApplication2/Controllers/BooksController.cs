@@ -12,7 +12,7 @@ namespace WebApplication2.Controllers
 {
     public class BooksController : Controller
     {
-       Handler handler = new Handler(); 
+        Handler handler = new Handler();
 
         public ActionResult List()
         {
@@ -38,9 +38,9 @@ namespace WebApplication2.Controllers
         }
 
         public ActionResult GetBooksList(BooksModel model)
-        { 
+        {
             try
-            {               
+            {
                 Session["SearchFormData"] = model;
                 Books booksDal = new Books();
                 model.BooksList = booksDal.GetSearchedBooksList(model);
@@ -48,7 +48,7 @@ namespace WebApplication2.Controllers
             }
             catch (Exception ex)
             {
-                handler.InsertErrorLog(ex); 
+                handler.InsertErrorLog(ex);
                 return Json(new { success = false, message = "Something Error Occurred..." });
             }
         }
@@ -139,7 +139,7 @@ namespace WebApplication2.Controllers
             }
             catch (Exception ex)
             {
-                handler.InsertErrorLog(ex); 
+                handler.InsertErrorLog(ex);
                 return Json(new { success = false, message = "Something Error Occurred..." });
             }
         }
@@ -152,11 +152,11 @@ namespace WebApplication2.Controllers
                 Books book = new Books
                 {
                     BookId = Id,
-                    ModifiedBy = 1, 
+                    ModifiedBy = 1,
                     ModifiedOn = DateTime.Now
                 };
 
-                bool isDeleted = book.Delete();  
+                bool isDeleted = book.Delete();
 
                 if (isDeleted)
                 {
@@ -169,7 +169,7 @@ namespace WebApplication2.Controllers
             }
             catch (Exception ex)
             {
-                handler.InsertErrorLog(ex);  
+                handler.InsertErrorLog(ex);
                 return Json(new { success = false, message = "An error occurred: " + ex.Message });
             }
         }
@@ -192,7 +192,7 @@ namespace WebApplication2.Controllers
                     {
                         return HttpNotFound("Book issue not found");
                     }
-           
+
                     // Map entity to model
                     model.BookIssueId = issue.BookIssueId;
                     model.MemberId = issue.MemberId;
@@ -214,7 +214,7 @@ namespace WebApplication2.Controllers
 
                     ViewBag.PageMode = "Add";
                 }
-           
+
                 return View(model);
 
             }
@@ -276,37 +276,5 @@ namespace WebApplication2.Controllers
                 return View("Error");
             }
         }
-
-
-        [HttpPost]
-        public JsonResult DeleteBookIssueDetail(int bookIssueDetailId)
-        {
-            try
-            {
-                BookIssueDetails detail = new BookIssueDetails
-                {
-                    BookIssueDetailId = bookIssueDetailId,
-                    ModifiedBy = 1, 
-                    ModifiedOn = DateTime.Now
-                };
-
-                bool isDeleted = detail.Delete();
-
-                if (isDeleted)
-                {
-                    return Json(new { success = true, message = "Book issue detail deleted successfully." });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Failed to delete the book issue detail." });
-                }
-            }
-            catch (Exception ex)
-            {
-                handler.InsertErrorLog(ex);
-                return Json(new { success = false, message = "An error occurred: " + ex.Message });
-            }
-        }
-
     }
 }
