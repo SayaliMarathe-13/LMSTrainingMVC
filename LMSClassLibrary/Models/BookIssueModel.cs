@@ -17,8 +17,8 @@ namespace DAL.Models
         public int BookIssueId { get; set; }
         public int MemberId { get; set; }
         public string MemberName { get; set; }
-        public DateTime? IssueDate { get; set; }
-        public DateTime? DueDate { get; set; }
+        public DateTime IssueDate { get; set; }
+        public DateTime DueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public int LibrarianId { get; set; }
         public string LibrarianName { get; set; }
@@ -31,10 +31,12 @@ namespace DAL.Models
         public List<MembersModel> MembersList { get; set; }
         public List<BookIssueDetailsModel> SelectedBooks { get; set; }
         public List<BookIssueModel> IssueBookList { get; set; }
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
         public int TotalRecords { get; set; }
         public List<BookIssueDetailsModel> IssuedBooks { get; set; }
+        public List<int> DeletedDocumentIds { get; set; } = new List<int>();
+
 
     }
 

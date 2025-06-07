@@ -167,8 +167,8 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_AddBook.cshtml" />
     <Content Include="Views\Books\IssueBooks.cshtml" />
-    <Content Include="Views\Books\IssueBookList.cshtml" />
-    <Content Include="Views\Shared\_List.cshtml" />
+    <Content Include="Views\Books\IssueBooksList.cshtml" />
+    <Content Include="Views\Shared\_IssueBooksTable.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

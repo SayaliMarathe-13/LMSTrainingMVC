@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="Dal\BookIssue.cs" />
     <Compile Include="Dal\BookIssueDetails.cs" />
+    <Compile Include="Dal\BookIssueDocuments.cs" />
     <Compile Include="Dal\Books.cs" />
     <Compile Include="Dal\Courses.cs" />
     <Compile Include="Dal\Librarians.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Dal\Publishers.cs" />
     <Compile Include="Dal\Suppliers.cs" />
     <Compile Include="Models\BookIssueDetailsModel.cs" />
+    <Compile Include="Models\BookIssueDocumentsModel.cs" />
     <Compile Include="Models\BookIssueModel.cs" />
     <Compile Include="Models\BooksModel.cs" />
     <Compile Include="Models\CoursesModel.cs" />

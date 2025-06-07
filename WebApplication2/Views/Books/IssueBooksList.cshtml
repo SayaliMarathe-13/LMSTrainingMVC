@@ -1,0 +1,71 @@
+﻿@model DAL.Models.BookIssueModel
+
+@{
+    ViewBag.Title = "Book Issue List";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Book Issue List</h2>
+    <a href="@Url.Action("IssueBooks", "Books")" class="btn btn-success">
+        <i class="bi bi-plus-circle me-1"></i> Add Issue
+    </a>
+</div>
+
+
+<form id="searchForm" method="get" class="d-flex align-items-center gap-2 mb-3">
+    <button type="button" class="btn btn-secondary" id="resetButton">Reset</button>
+    <input type="hidden" name="PageNumber" id="PageNumber" value="@(Model.PageNumber)" />
+    <input type="hidden" name="PageSize" id="PageSize" value="@(Model.PageSize)" />
+</form>
+
+<div id="issueBooksTableContainer">
+   
+</div>
+
+@section Scripts {
+    <script>
+        function loadIssueBooks() {
+            var formData = $('#searchForm').serialize();
+            console.log(formData)
+            $.ajax({
+                url: '@Url.Action("GetIssueBooksList", "Books")',
+                type: 'GET',
+                data: formData,
+                success: function (result) {
+                    $('#issueBooksTableContainer').html(result);
+                },
+                error: function () {
+                    alert('Failed to load data. Please try again.');
+                }
+            });
+        }
+
+
+        $(function () {
+            $('#searchForm').on('submit', function (e) {
+                e.preventDefault();
+                loadIssueBooks();
+            });
+            loadIssueBooks();
+        });
+
+        $(document).on('change', '#PageSizeSelector', function () {
+            var selectedSize = $(this).val();
+            $('#PageSize').val(selectedSize);
+            $('#PageNumber').val(1); 
+            loadIssueBooks(); 
+        });
+
+        $(document).on('click', '.pagination-button', function () {
+            var page = $(this).data('page');
+            $('#PageNumber').val(page);
+            loadIssueBooks(); 
+        });
+
+        $('#resetButton').click(function () {
+            $('#PageNumber').val(1);
+            $('#PageSize').val(10);
+            loadIssueBooks();
+        });
+    </script>
+}

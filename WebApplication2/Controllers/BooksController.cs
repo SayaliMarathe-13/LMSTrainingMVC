@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System;
+using System.Web;
+using System.Configuration;
+using System.IO;
+using Newtonsoft.Json;
 
 
 namespace WebApplication2.Controllers
@@ -201,13 +205,13 @@ namespace WebApplication2.Controllers
                     // Map entity to model
                     model.BookIssueId = issue.BookIssueId;
                     model.MemberId = issue.MemberId;
-                    model.IssueDate = issue.IssueDate ?? DateTime.Today;
-                    model.DueDate = issue.DueDate ?? DateTime.Today.AddDays(7);
+                    model.IssueDate = issue.IssueDate;
+                    model.DueDate = issue.DueDate;
                     model.ReturnDate = issue.ReturnDate;
                     model.LibrarianId = issue.LibrarianId;
                     model.IsActive = issue.IsActive;
 
-                    ViewBag.PageMode = "Edit";
+                    //ViewBag.PageMode = "Edit";
                 }
                 else
                 {
@@ -232,27 +236,70 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
-        public ActionResult IssueBooks(BookIssueModel model)
+        public ActionResult IssueBooks(string model, IEnumerable<HttpPostedFileBase> SupportDocuments)
         {
             try
             {
-                if (model.SelectedBooks == null || !model.SelectedBooks.Any())
+                var bookIssueModel = JsonConvert.DeserializeObject<BookIssueModel>(model);
+
+                if (bookIssueModel.SelectedBooks == null || !bookIssueModel.SelectedBooks.Any())
                 {
                     return Json(new { success = false, message = "Please select at least one book." });
                 }
-
-                model.CreatedBy = model.BookIssueId == 0 ? 1 : model.CreatedBy;
-                model.ModifiedBy = model.BookIssueId > 0 ? 1 : (int?)null;
+                bool isNew = bookIssueModel.BookIssueId == 0;
+                bookIssueModel.CreatedBy = bookIssueModel.BookIssueId == 0 ? 1 : bookIssueModel.CreatedBy;
+                bookIssueModel.ModifiedBy = bookIssueModel.BookIssueId > 0 ? 1 : (int?)null;
 
                 BookIssue dal = new BookIssue();
-                bool saved = dal.SaveOrUpdate(model);
+                bool saved = dal.SaveOrUpdate(bookIssueModel);
+
+                if (saved && bookIssueModel.BookIssueId > 0 && SupportDocuments != null)
+                {
+                    foreach (var file in SupportDocuments)
+                    {
+                        if (file != null && file.ContentLength > 0)
+                        {
+                            var uploadDirPath = ConfigurationManager.AppSettings["UploadFolder"]; 
+                            var uploadDir = Server.MapPath(uploadDirPath);
+                            Directory.CreateDirectory(uploadDir);
+
+                            var fileExtension = Path.GetExtension(file.FileName);
+                            var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
+                            var fullPath = Path.Combine(uploadDir, uniqueFileName);
+
+                            file.SaveAs(fullPath);
+
+                            var doc = new BookIssueDocuments
+                            {
+                                BookIssueId = bookIssueModel.BookIssueId,
+                                FileName = file.FileName,
+                                FilePath = uniqueFileName, 
+                                ContentType = file.ContentType,
+                                UploadedBy = bookIssueModel.CreatedBy,
+                            };
+
+                            BookIssueDocuments bookIssueDocuments = new BookIssueDocuments();
+                            bookIssueDocuments.Insert(doc);
+                        }
+
+                    }
+                }
+                if (bookIssueModel.DeletedDocumentIds != null && bookIssueModel.DeletedDocumentIds.Any())
+                {
+                    BookIssueDocuments bookIssueDocuments = new BookIssueDocuments();
+                    foreach (var docId in bookIssueModel.DeletedDocumentIds)
+                    {
+                        bookIssueDocuments.Delete(docId);
+                    }
+                }
 
                 if (!saved)
                     return Json(new { success = false, message = "Failed to save book issue." });
 
-                string message = model.BookIssueId == 0
-                    ? "Book issue created successfully."
-                    : "Book issue updated successfully.";
+                    string message = isNew
+                 ? "Book issue created successfully."
+                 : "Book issue updated successfully.";
+
 
                 return Json(new { success = true, message });
             }
@@ -263,17 +310,15 @@ namespace WebApplication2.Controllers
             }
         }
 
-        public ActionResult IssueBookList()
+
+        public ActionResult IssueBooksList()
         {
             try
             {
                 BookIssue bookIssueDal = new BookIssue();
 
-                var model = new BookIssueModel
-                {
-                    IssueBookList = bookIssueDal.GetBookIssueList()
-                };
-
+                var model = new BookIssueModel();               
+                Session["SearchFormData"] = model;              
                 return View(model);
             }
             catch (Exception ex)
@@ -283,6 +328,25 @@ namespace WebApplication2.Controllers
                 return View("Error");
             }
         }
+
+        public ActionResult GetIssueBooksList(BookIssueModel model)
+        {
+            try
+            {
+                Session["SearchFormData"] = model;
+                BookIssue bookIssueDal = new BookIssue();
+                model.IssueBookList = bookIssueDal.GetBookIssueList(model);
+
+                return PartialView("_IssueBooksTable", model);
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                return Json(new { success = false, message = "Something went wrong. Please try again." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
         [HttpGet]
         public JsonResult GetAvailableCopies(int bookId)
         {
@@ -305,6 +369,49 @@ namespace WebApplication2.Controllers
             Session["IsSelectionMode"] = isSelectionMode;
             return Json(new { success = true });
         }
+        [HttpGet]
+        public JsonResult GetDocuments(int bookIssueId)
+        {
+            try
+            {
+                var dal = new BookIssueDocuments();
+                var docs = dal.GetDocumentsByBookIssueId(bookIssueId);
+
+                var result = docs.Select(d => new
+                {
+                    d.DocumentId,
+                    d.FileName,
+                    d.FilePath
+                });
+
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                handler.InsertErrorLog(ex);
+                return Json(new { success = false, message = "Failed to load documents." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        public ActionResult DownloadDocument(int documentId)
+        {
+            BookIssueDocuments bookIssueDocuments = new BookIssueDocuments();
+            var document = bookIssueDocuments.GetDocumentById(documentId);
+
+            if (document == null)
+                return HttpNotFound();
+
+            var uploadDirPath = ConfigurationManager.AppSettings["UploadFolder"]; // "~/UploadedDocuments"
+            var fullVirtualPath = Path.Combine(uploadDirPath, document.FilePath).Replace("\\", "/");
+            var filePath = Server.MapPath(fullVirtualPath);
+
+            if (!System.IO.File.Exists(filePath))
+                return HttpNotFound();
+
+            return File(filePath, document.ContentType, document.FileName);
+        }
 
     }
+
 }
+

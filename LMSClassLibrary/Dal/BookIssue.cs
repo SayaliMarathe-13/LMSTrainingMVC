@@ -15,18 +15,19 @@ namespace DAL.Dal
         private readonly Database db;
         public int BookIssueId { get; set; }
         public int MemberId { get; set; }
-        public DateTime? IssueDate { get; set; }
-        public DateTime? DueDate { get; set; }
+        public DateTime IssueDate { get; set; }
+        public DateTime DueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public int LibrarianId { get; set; }
         public bool IsActive { get; set; }
         public int CreatedBy { get; set; }
-        public DateTime? CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public int TotalRecords { get; set; }
+        public List<BookIssueModel> IssueBookList { get; set; }
         public BookIssue()
         {
             try
@@ -40,13 +41,15 @@ namespace DAL.Dal
             }
         }
 
-        public List<BookIssueModel> GetBookIssueList()
+        public List<BookIssueModel> GetBookIssueList(BookIssueModel model)
         {
             List<BookIssueModel> bookIssueList = new List<BookIssueModel>();
 
             try
             {
                 DbCommand cmd = db.GetStoredProcCommand("BookIssueGetList");
+                db.AddInParameter(cmd, "@PageNumber", DbType.Int32, model.PageNumber);
+                db.AddInParameter(cmd, "@PageSize", DbType.Int32, model.PageSize);
 
                 DataSet ds = db.ExecuteDataSet(cmd);
 
@@ -65,6 +68,12 @@ namespace DAL.Dal
                             IsActive = row["IsActive"] != DBNull.Value ? Convert.ToBoolean(row["IsActive"]) : false
                         };
 
+                        // Set total records once (from first row)
+                        if (model.TotalRecords == 0 && ds.Tables[0].Columns.Contains("TotalRecords"))
+                        {
+                            model.TotalRecords = Convert.ToInt32(row["TotalRecords"]);
+                        }
+
                         bookIssueList.Add(issue);
                     }
                 }
@@ -78,7 +87,8 @@ namespace DAL.Dal
             return bookIssueList;
         }
 
-        
+
+
         public bool SaveOrUpdate(BookIssueModel model)
         {
             try
@@ -90,7 +100,7 @@ namespace DAL.Dal
                 dt.Columns.Add("Quantity", typeof(int));
                 dt.Columns.Add("CreatedBy", typeof(int));
                 dt.Columns.Add("ModifiedBy", typeof(int));
-
+               
                 foreach (var book in model.SelectedBooks)
                 {
                     
@@ -129,7 +139,7 @@ namespace DAL.Dal
                 // Add BookIssueDetails TVP
                 SqlParameter tvpParam = new SqlParameter("@BookIssueDetails", SqlDbType.Structured)
                 {
-                    TypeName = "dbo.BookIssueDetailsMergeType",
+                    TypeName = "dbo.BookIssueDetailsType",
                     Value = dt
                 };
                 cmd.Parameters.Add(tvpParam);
@@ -165,14 +175,14 @@ namespace DAL.Dal
                         this.BookIssueId = Convert.ToInt32(dt.Rows[0]["BookIssueId"]);
                         this.MemberId = Convert.ToInt32(dt.Rows[0]["MemberId"]);
 
-                        this.IssueDate = dt.Rows[0]["IssueDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dt.Rows[0]["IssueDate"]);
-                        this.DueDate = dt.Rows[0]["DueDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dt.Rows[0]["DueDate"]);
+                        this.IssueDate =Convert.ToDateTime(dt.Rows[0]["IssueDate"]);
+                        this.DueDate = Convert.ToDateTime(dt.Rows[0]["DueDate"]);
                         this.ReturnDate = dt.Rows[0]["ReturnDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dt.Rows[0]["ReturnDate"]);
 
                         this.LibrarianId = Convert.ToInt32(dt.Rows[0]["LibrarianId"]);
                         this.IsActive = Convert.ToBoolean(dt.Rows[0]["IsActive"]);
                         this.CreatedBy = Convert.ToInt32(dt.Rows[0]["CreatedBy"]);
-                        this.CreatedOn = dt.Rows[0]["CreatedOn"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dt.Rows[0]["CreatedOn"]);
+                        this.CreatedOn = Convert.ToDateTime(dt.Rows[0]["CreatedOn"]);
                         this.ModifiedBy = Convert.ToInt32(dt.Rows[0]["ModifiedBy"]);
                         this.ModifiedOn = dt.Rows[0]["ModifiedOn"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dt.Rows[0]["ModifiedOn"]);
 
