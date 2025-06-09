@@ -3,10 +3,10 @@
 @{
     int totalPages = (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize);
     int startRecord = ((Model.PageNumber - 1) * Model.PageSize) + 1;
-    int endRecord = startRecord + Model.BooksList.Count() - 1;
+    int endRecord = startRecord + Model.PageSize - 1;
     string currentSortColumn = Model.SortColumn;
     string currentSortDirection = Model.SortDirection;
-    
+
 }
 
 

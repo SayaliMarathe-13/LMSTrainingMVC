@@ -2,7 +2,6 @@
 using DAL.Models;
 using DAL.Dal;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System;
 using System.Web;
@@ -333,10 +332,9 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                Session["SearchFormData"] = model;
+                //Session["SearchFormData"] = model;
                 BookIssue bookIssueDal = new BookIssue();
                 model.IssueBookList = bookIssueDal.GetBookIssueList(model);
-
                 return PartialView("_IssueBooksTable", model);
             }
             catch (Exception ex)

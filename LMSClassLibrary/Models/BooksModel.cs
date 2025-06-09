@@ -35,8 +35,8 @@ namespace DAL.Models
         [Required(ErrorMessage = "IsActive is required.")]
         public bool IsActive { get; set; } = false;
 
-        public int? CreatedBy { get; set; }
-        public DateTime? CreatedOn { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
 

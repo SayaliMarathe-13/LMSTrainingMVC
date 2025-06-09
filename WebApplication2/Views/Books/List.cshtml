@@ -344,16 +344,14 @@
                }
            });*@
 
-
-            var isSelectionMode = @((ViewBag.IsSelectionMode != null && (bool)ViewBag.IsSelectionMode) ? "true" : "false");
     $('.selectpicker').on('changed.bs.select', function () {
     loadBooks();
     });
 
-    $('.filter-dropdown').change(function () {
-    //$('#PageNumber').val(1);
-    loadBooks();
-    });
+    //$('.filter-dropdown').change(function () {
+    ////$('#PageNumber').val(1);
+    //loadBooks();
+    //});
 
     $('#searchButton').click(function () {
     loadBooks();
@@ -361,8 +359,6 @@
 
     $('#resetButton').click(function () {
     $('#BookName').val("");
-    $('#PublisherId').val("");
-    $('#SupplierId').val("");
     $('#PublisherIdsDropdown').selectpicker('deselectAll');
     $('#SupplierIdsDropdown').selectpicker('deselectAll');
     $('#CourseIdsDropdown').selectpicker('deselectAll');

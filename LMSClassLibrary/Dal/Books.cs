@@ -24,8 +24,8 @@ namespace DAL.Dal
         public int SupplierId { get; set; }
         public String SupplierName { get; set; }
         public bool IsActive { get; set; }
-        public int? CreatedBy { get; set; }
-        public DateTime? CreatedOn { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedOn { get; set; }
 
@@ -164,7 +164,6 @@ namespace DAL.Dal
             {
                 handler.InsertErrorLog(ex);
                 throw new Exception("Error loading books list: " + ex.Message);
-                return false;
             }
         }
 
